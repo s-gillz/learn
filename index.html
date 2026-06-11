@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inclusive Literacy Hub — Ultimate Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://webgazer.cs.brown.edu/webgazer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1; --success: #10b981; --warning: #f59e0b;
+            --danger: #ef4444; --bg: #f8fafc; --card: #ffffff; --text: #1e293b;
+        }
+        [data-theme="dark"] { --bg: #1e293b; --card: #334155; --text: #f1f5f9; }
+        [data-theme="calm"] { --bg: #ecfdf5; --card: #ffffff; --text: #064e3b; --primary: #059669; }
+        [data-theme="highcontrast"] { --bg: #000000; --card: #1a1a1a; --text: #ffff00; --primary: #ffff00; }
+        body { background: var(--bg); color: var(--text); transition: all 0.3s; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background: var(--card); }
+        .btn-primary { background: var(--primary); color: white; }
+        .input-correct { border-color: var(--success) !important; background-color: #ecfdf5 !important; }
+        .input-wrong { border-color: var(--warning) !important; background-color: #fffbeb !important; }
+        .token-earned { animation: pop 0.5s ease; }
+        @keyframes pop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .switch-highlight { animation: scanPulse 1s infinite; }
+        @keyframes scanPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.7); } 50% { box-shadow: 0 0 0 12px rgba(99,102,241,0); } }
+        .progress-fill { transition: width 0.5s ease; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .on-screen-key { min-width: 3rem; min-height: 3rem; font-size: 1.5rem; font-weight: bold; }
+        .mic-listening { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        /* Eye gaze cursor */
+        #gazeCursor {
+            position: fixed; width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(99, 102, 241, 0.5); border: 3px solid var(--primary);
+            pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+            transition: left 0.1s, top 0.1s; display: none;
+        }
+        #gazeCursor.active { display: block; }
+        #gazeDwell {
+            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px;
+            border-radius: 50%; border: 3px solid transparent; border-top-color: var(--primary);
+            transform: translate(-50%, -50%); animation: none;
+        }
+        #gazeCursor.dwelling #gazeDwell { animation: dwellSpin 1.2s linear; }
+        @keyframes dwellSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        
+        /* Handwriting canvas */
+        #handwritingCanvas {
+            border: 4px dashed var(--primary); border-radius: 24px;
+            background: white; touch-action: none; cursor: crosshair;
+        }
+        .letter-guide {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 20rem; font-weight: 900; color: rgba(99, 102, 241, 0.12);
+            pointer-events: none; user-select: none; font-family: 'Comic Sans MS', cursive;
+        }
+        
+        /* Social story */
+        .story-page { animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Calibration dot */
+        .calib-dot {
+            position: fixed; width: 30px; height: 30px; border-radius: 50%;
+            background: #ef4444; border: 4px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            z-index: 10000; transform: translate(-50%, -50%);
+            animation: calibPulse 1s infinite;
+        }
+        @keyframes calibPulse { 0%,100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } }
+        
+        /* Adaptive badge */
+        .adaptive-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 999px;
+            font-size: 0.75rem; font-weight: bold; margin-left: 8px;
+        }
+        .level-easy { background: #dbeafe; color: #1e40af; }
+        .level-medium { background: #fef3c7; color: #92400e; }
+        .level-hard { background: #fee2e2; color: #991b1b; }
+        
+        /* Teacher dashboard */
+        .student-row:hover { background: rgba(99, 102, 241, 0.05); }
+        
+        /* RTL support for Arabic */
+        [dir="rtl"] { text-align: right; }
+        [dir="rtl"] .flex-row-rtl { flex-direction: row-reverse; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <div id="gazeCursor"><div id="gazeDwell"></div></div>
+
+    <!-- ============ TOP BAR ============ -->
+    <div class="w-full max-w-5xl flex justify-between items-center mb-4 flex-wrap gap-2">
+        <h1 class="text-2xl font-black">🌟 <span data-i18n="appTitle">Inclusive Literacy Hub</span></h1>
+        <div class="flex gap-2 flex-wrap">
+            <select id="langSelect" onchange="changeLanguage(this.value)" class="p-2 rounded-xl card border-2 font-bold">
+                <option value="en">🇬🇧 EN</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="ar">🇸🇦 AR</option>
+                <option value="zh">🇨🇳 ZH</option>
+                <option value="pa">🇮🇳 PA</option>
+            </select>
+            <button onclick="toggleMute()" id="muteBtn" class="p-2 rounded-xl card border-2 text-xl">🔊</button>
+            <button onclick="cycleTheme()" class="p-2 rounded-xl card border-2 text-xl">🎨</button>
+            <button onclick="showScreen('settingsScreen')" class="p-2 rounded-xl card border-2 text-xl">⚙️</button>
+            <button onclick="showScreen('teacherLogin')" class="p-2 rounded-xl card border-2 text-xl">👩‍🏫</button>
+            <button onclick="showScreen('homeScreen')" class="p-2 rounded-xl card border-2 text-xl">🏠</button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-5xl mx-auto space-y-6">
+
+        <!-- ============ HOME ============ -->
+        <div id="homeScreen" class="screen active space-y-6 text-center">
+            <div class="text-7xl">✏️</div>
+            <h2 class="text-4xl font-extrabold" data-i18n="chooseActivity">What shall we practice?</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                <button onclick="startMode('sentences')" class="p-6 card border-4 border-indigo-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">📖</div><div class="font-black text-xl" data-i18n="sentences">Sentences</div>
+                </button>
+                <button onclick="startMode('words')" class="p-6 card border-4 border-purple-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">🔤</div><div class="font-black text-xl" data-i18n="sightWords">Sight Words</div>
+                </button>
+                <button onclick="startMode('phonics')" class="p-6 card border-4 border-emerald-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">🔊</div><div class="font-black text-xl" data-i18n="phonics">Phonics</div>
+                </button>
+                <button onclick="startMode('matching')" class="p-6 card border-4 border-amber-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">🎯</div><div class="font-black text-xl" data-i18n="matchWords">Match Words</div>
+                </button>
+                <button onclick="startMode('build')" class="p-6 card border-4 border-rose-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">🧩</div><div class="font-black text-xl" data-i18n="buildSentences">Build Sentences</div>
+                </button>
+                <button onclick="startMode('handwriting')" class="p-6 card border-4 border-teal-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">✍️</div><div class="font-black text-xl" data-i18n="handwriting">Handwriting</div>
+                </button>
+                <button onclick="startMode('stories')" class="p-6 card border-4 border-pink-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">📚</div><div class="font-black text-xl" data-i18n="socialStories">Social Stories</div>
+                </button>
+                <button onclick="startMode('custom')" class="p-6 card border-4 border-slate-300 rounded-3xl shadow-lg hover:scale-105 transition-all space-y-2">
+                    <div class="text-5xl">⭐</div><div class="font-black text-xl" data-i18n="myWords">My Words</div>
+                </button>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-4 max-w-md mx-auto">
+                <div class="font-bold mb-2">🏆 <span data-i18n="myStars">My Stars</span></div>
+                <div id="tokenDisplay" class="flex justify-center gap-1 flex-wrap text-3xl"></div>
+            </div>
+            
+            <div id="adaptiveInsight" class="card rounded-3xl border-2 border-indigo-200 p-4 max-w-xl mx-auto text-left hidden">
+                <div class="font-bold text-indigo-700 mb-1">🤖 <span data-i18n="aiCoach">AI Learning Coach</span></div>
+                <div id="adaptiveText" class="text-sm"></div>
+            </div>
+        </div>
+
+        <!-- ============ SETUP SCREEN ============ -->
+        <div id="setupScreen" class="screen space-y-6 text-center">
+            <h2 id="setupTitle" class="text-3xl font-extrabold">Setup</h2>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg" data-i18n="howAnswer">✋ How will you answer?</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <button onclick="setInputMethod('keyboard')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1">
+                        <div class="text-3xl">⌨️</div><div class="font-bold text-sm">Keyboard</div>
+                    </button>
+                    <button onclick="setInputMethod('voice')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1">
+                        <div class="text-3xl">🎤</div><div class="font-bold text-sm">Voice</div>
+                    </button>
+                    <button onclick="setInputMethod('onscreen')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1">
+                        <div class="text-3xl">🖱️</div><div class="font-bold text-sm">Click</div>
+                    </button>
+                    <button onclick="setInputMethod('switch')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1">
+                        <div class="text-3xl">🔘</div><div class="font-bold text-sm">Switch</div>
+                    </button>
+                    <button onclick="setInputMethod('eyegaze')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1">
+                        <div class="text-3xl">👁️</div><div class="font-bold text-sm">Eye Gaze</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg" data-i18n="howMuchHelp">💡 How much help?</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="setSupport('independent')" class="support-btn p-4 rounded-2xl border-2 card">
+                        <div class="text-2xl">💪</div><div class="font-bold text-sm">On My Own</div>
+                    </button>
+                    <button onclick="setSupport('hints')" class="support-btn p-4 rounded-2xl border-2 card">
+                        <div class="text-2xl">🔍</div><div class="font-bold text-sm">Give Hints</div>
+                    </button>
+                    <button onclick="setSupport('errorless')" class="support-btn p-4 rounded-2xl border-2 card">
+                        <div class="text-2xl">🤝</div><div class="font-bold text-sm">Help Me</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg" data-i18n="showPictures">🖼️ Show pictures?</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setVisuals(true)" class="visual-btn p-4 rounded-2xl border-2 card">
+                        <div class="text-2xl">✅</div><div class="font-bold">Yes</div>
+                    </button>
+                    <button onclick="setVisuals(false)" class="visual-btn p-4 rounded-2xl border-2 card">
+                        <div class="text-2xl">❌</div><div class="font-bold">Text only</div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="caseSelector" class="card rounded-3xl border-2 p-6 space-y-3 hidden">
+                <h3 class="font-bold text-lg">🔠 Letter style</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="setCase('lower')" class="case-btn p-3 rounded-2xl border-2 card">abc</button>
+                    <button onclick="setCase('sentence')" class="case-btn p-3 rounded-2xl border-2 card">Abc</button>
+                    <button onclick="setCase('upper')" class="case-btn p-3 rounded-2xl border-2 card">ABC</button>
+                </div>
+            </div>
+
+            <button onclick="beginSession()" class="px-12 py-4 btn-primary font-black text-xl rounded-3xl shadow-lg hover:scale-105 transition-all">
+                ▶️ <span data-i18n="letsGo">Let's Go!</span>
+            </button>
+        </div>
+
+        <!-- ============ GAME SCREEN ============ -->
+        <div id="gameScreen" class="screen space-y-4">
+            <div class="card rounded-3xl border-2 p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="progress" class="font-black">Item 1 of 5</span>
+                    <div id="levelBadge"></div>
+                    <div id="tokenBar" class="flex gap-1 text-2xl"></div>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div id="progressBar" class="progress-fill bg-indigo-500 h-3 rounded-full" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-4 text-sm font-bold">
+                <div>Target: 
+                    <button onclick="changeFontSize('target', 4)" class="px-3 py-1 card border rounded">A+</button>
+                    <button onclick="changeFontSize('target', -4)" class="px-3 py-1 card border rounded ml-1">A-</button>
+                </div>
+                <div>Input: 
+                    <button onclick="changeFontSize('studentInput', 4)" class="px-3 py-1 card border rounded">A+</button>
+                    <button onclick="changeFontSize('studentInput', -4)" class="px-3 py-1 card border rounded ml-1">A-</button>
+                </div>
+            </div>
+
+            <div id="targetCard" class="card border-4 rounded-3xl p-6 text-center shadow-sm">
+                <div id="targetVisual" class="text-7xl mb-2 hidden"></div>
+                <div id="target" class="font-black text-4xl"></div>
+                <div class="mt-3 flex justify-center gap-2 flex-wrap">
+                    <button onclick="speakCurrent()" class="px-4 py-2 bg-indigo-100 rounded-xl font-bold text-indigo-700">🔊 <span data-i18n="hearIt">Hear It</span></button>
+                    <button onclick="speakSlow()" class="px-4 py-2 bg-indigo-100 rounded-xl font-bold text-indigo-700">🐢 <span data-i18n="slow">Slow</span></button>
+                    <button onclick="soundOut()" class="px-4 py-2 bg-indigo-100 rounded-xl font-bold text-indigo-700">🔤 <span data-i18n="soundIt">Sound It</span></button>
+                    <button id="hintBtn" onclick="giveHint()" class="px-4 py-2 bg-amber-100 rounded-xl font-bold text-amber-700 hidden">💡 <span data-i18n="hint">Hint</span></button>
+                </div>
+            </div>
+
+            <div id="inputArea">
+                <input type="text" id="studentInput" class="w-full font-bold py-6 px-8 rounded-3xl border-4 text-center text-3xl outline-none card hidden" placeholder="Type here..." autocomplete="off">
+                
+                <div id="voiceInput" class="hidden text-center space-y-3">
+                    <button onclick="toggleVoice()" id="micBtn" class="w-32 h-32 rounded-full bg-red-500 text-white text-5xl shadow-xl mx-auto flex items-center justify-center">🎤</button>
+                    <div id="voiceStatus" class="font-bold text-lg">Tap microphone, then speak</div>
+                    <div id="voiceResult" class="text-2xl font-black min-h-[3rem]"></div>
+                    <button onclick="submitVoice()" class="px-8 py-3 btn-primary font-bold text-xl rounded-2xl hidden" id="voiceSubmit">✓ <span data-i18n="thatsWhat">That's what I said</span></button>
+                </div>
+
+                <div id="onscreenInput" class="hidden space-y-3">
+                    <div id="onscreenDisplay" class="w-full font-bold py-4 px-6 rounded-3xl border-4 text-center text-3xl card min-h-[5rem]"></div>
+                    <div id="onscreenKeyboard" class="grid grid-cols-10 gap-1 sm:gap-2"></div>
+                    <div class="flex gap-2 justify-center flex-wrap">
+                        <button onclick="oskAction('space')" class="px-6 py-3 card border-2 rounded-xl font-bold">␣</button>
+                        <button onclick="oskAction('back')" class="px-6 py-3 card border-2 rounded-xl font-bold">⌫</button>
+                        <button onclick="oskAction('clear')" class="px-6 py-3 card border-2 rounded-xl font-bold">🗑️</button>
+                        <button onclick="oskAction('submit')" class="px-6 py-3 btn-primary rounded-xl font-bold">✓</button>
+                    </div>
+                </div>
+
+                <div id="switchInput" class="hidden space-y-3">
+                    <div id="switchDisplay" class="w-full font-bold py-4 px-6 rounded-3xl border-4 text-center text-3xl card min-h-[5rem]"></div>
+                    <div id="switchRow" class="text-center text-4xl font-black p-8 card border-4 rounded-3xl min-h-[8rem] flex items-center justify-center">Press SELECT</div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="switchAction('select')" class="py-8 btn-primary font-black text-2xl rounded-3xl shadow-lg">✓ SELECT</button>
+                        <button onclick="switchAction('next')" class="py-8 bg-slate-500 text-white font-black text-2xl rounded-3xl shadow-lg">▶ NEXT</button>
+                    </div>
+                </div>
+
+                <div id="eyegazeInput" class="hidden space-y-3">
+                    <div id="eyegazeStatus" class="text-center font-bold text-lg p-4 card rounded-2xl border-2">
+                        👁️ <span data-i18n="lookAt">Look at the letters. Hold your gaze to select.</span>
+                    </div>
+                    <div id="eyegazeDisplay" class="w-full font-bold py-4 px-6 rounded-3xl border-4 text-center text-3xl card min-h-[5rem]"></div>
+                    <div id="eyegazeKeyboard" class="grid grid-cols-10 gap-1 sm:gap-2"></div>
+                    <div class="flex gap-2 justify-center flex-wrap">
+                        <button data-gaze="space" class="gaze-key px-6 py-3 card border-2 rounded-xl font-bold">␣ Space</button>
+                        <button data-gaze="back" class="gaze-key px-6 py-3 card border-2 rounded-xl font-bold">⌫</button>
+                        <button data-gaze="clear" class="gaze-key px-6 py-3 card border-2 rounded-xl font-bold">🗑️</button>
+                        <button data-gaze="submit" class="gaze-key px-6 py-3 btn-primary rounded-xl font-bold">✓</button>
+                    </div>
+                    <button onclick="recalibrateGaze()" class="mx-auto block px-4 py-2 bg-amber-100 rounded-xl font-bold text-amber-700">🎯 <span data-i18n="recalibrate">Recalibrate</span></button>
+                </div>
+            </div>
+
+            <div id="msg" class="text-center font-black text-lg min-h-[2rem]"></div>
+        </div>
+
+        <!-- ============ HANDWRITING SCREEN ============ -->
+        <div id="handwritingScreen" class="screen space-y-4">
+            <div class="card rounded-3xl border-2 p-4">
+                <div class="flex justify-between items-center">
+                    <span id="hwProgress" class="font-black">Letter 1 of 10</span>
+                    <div id="hwTokenBar" class="flex gap-1 text-2xl"></div>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="hwTargetVisual" class="text-6xl mb-2"></div>
+                <div class="flex justify-center gap-2 items-center">
+                    <span class="font-black text-3xl" data-i18n="traceLetter">Trace the letter:</span>
+                    <span id="hwTarget" class="font-black text-5xl text-indigo-600"></span>
+                    <button onclick="speakHWTarget()" class="px-3 py-2 bg-indigo-100 rounded-xl font-bold">🔊</button>
+                </div>
+                <div id="hwInstructions" class="text-sm opacity-70 mt-1" data-i18n="useFinger">Use your finger or mouse to trace</div>
+            </div>
+            <div class="relative flex justify-center">
+                <div class="relative" style="width: min(90vw, 500px); height: min(90vw, 500px);">
+                    <div id="letterGuide" class="letter-guide">A</div>
+                    <canvas id="handwritingCanvas" width="500" height="500" style="width:100%; height:100%;"></canvas>
+                </div>
+            </div>
+            <div class="flex justify-center gap-2 flex-wrap">
+                <button onclick="hwUndo()" class="px-6 py-3 card border-2 rounded-xl font-bold">↶ Undo</button>
+                <button onclick="hwClear()" class="px-6 py-3 card border-2 rounded-xl font-bold">🗑️ Clear</button>
+                <button onclick="hwShowGuide()" class="px-6 py-3 bg-amber-100 rounded-xl font-bold">👁️ Show Guide</button>
+                <button onclick="hwCheck()" class="px-8 py-3 btn-primary font-bold rounded-xl">✓ <span data-i18n="check">Check</span></button>
+                <button onclick="hwSkip()" class="px-6 py-3 bg-slate-200 rounded-xl font-bold">⏭️ Skip</button>
+            </div>
+            <div id="hwMsg" class="text-center font-black text-lg min-h-[2rem]"></div>
+            <div class="card rounded-3xl border-2 p-4 text-sm">
+                <div class="font-bold mb-1">💡 Tips:</div>
+                <div id="hwTips" class="opacity-80">Start at the top. Follow the dotted letter.</div>
+            </div>
+        </div>
+
+        <!-- ============ SOCIAL STORIES ============ -->
+        <div id="storiesScreen" class="screen space-y-4">
+            <div class="card rounded-3xl border-2 p-4">
+                <div class="flex justify-between items-center">
+                    <span id="storyProgress" class="font-black">Story 1 of 5</span>
+                    <button onclick="showScreen('homeScreen')" class="px-4 py-2 bg-slate-200 rounded-xl font-bold">🏠</button>
+                </div>
+            </div>
+            <div id="storyContent" class="card border-4 rounded-3xl p-8 text-center space-y-4 min-h-[400px]">
+                <!-- Dynamic story content -->
+            </div>
+            <div class="flex justify-center gap-3">
+                <button onclick="storyPrev()" class="px-6 py-3 card border-2 rounded-xl font-bold">⬅️ <span data-i18n="back">Back</span></button>
+                <button onclick="storySpeak()" class="px-6 py-3 bg-indigo-100 rounded-xl font-bold">🔊 <span data-i18n="readAloud">Read Aloud</span></button>
+                <button onclick="storyNext()" class="px-6 py-3 btn-primary rounded-xl font-bold"><span data-i18n="next">Next</span> ➡️</button>
+            </div>
+        </div>
+
+        <!-- ============ MATCHING SCREEN ============ -->
+        <div id="matchingScreen" class="screen space-y-4">
+            <div class="card rounded-3xl border-2 p-4">
+                <div class="flex justify-between items-center">
+                    <span id="matchProgress" class="font-black">Match 1 of 5</span>
+                    <div id="matchTokenBar" class="flex gap-1 text-2xl"></div>
+                </div>
+            </div>
+            <h3 class="text-2xl font-black text-center" data-i18n="matchPictureWord">Match the picture to the word!</h3>
+            <div id="matchTarget" class="card border-4 rounded-3xl p-8 text-center">
+                <div id="matchTargetVisual" class="text-8xl mb-4"></div>
+                <button onclick="speakMatchTarget()" class="px-4 py-2 bg-indigo-100 rounded-xl font-bold">🔊</button>
+            </div>
+            <div id="matchOptions" class="grid grid-cols-2 gap-4"></div>
+            <div id="matchMsg" class="text-center font-black text-lg min-h-[2rem]"></div>
+        </div>
+
+        <!-- ============ BUILD SCREEN ============ -->
+        <div id="buildScreen" class="screen space-y-4">
+            <div class="card rounded-3xl border-2 p-4">
+                <div class="flex justify-between items-center">
+                    <span id="buildProgress" class="font-black">Sentence 1 of 5</span>
+                    <div id="buildTokenBar" class="flex gap-1 text-2xl"></div>
+                </div>
+            </div>
+            <div id="buildTargetVisual" class="text-center text-7xl"></div>
+            <button onclick="speakBuildTarget()" class="mx-auto block px-4 py-2 bg-indigo-100 rounded-xl font-bold">🔊</button>
+            <div id="buildAnswer" class="card border-4 rounded-3xl p-6 min-h-[5rem] text-center text-2xl font-bold flex flex-wrap gap-2 justify-center items-center"></div>
+            <div id="buildTiles" class="flex flex-wrap gap-3 justify-center"></div>
+            <div class="flex justify-center gap-2">
+                <button onclick="buildUndo()" class="px-6 py-3 card border-2 rounded-xl font-bold">⌫</button>
+                <button onclick="buildClear()" class="px-6 py-3 card border-2 rounded-xl font-bold">🗑️</button>
+                <button onclick="buildCheck()" class="px-6 py-3 btn-primary rounded-xl font-bold">✓</button>
+            </div>
+            <div id="buildMsg" class="text-center font-black text-lg min-h-[2rem]"></div>
+        </div>
+
+        <!-- ============ END SCREEN ============ -->
+        <div id="endScreen" class="screen text-center space-y-6">
+            <div class="text-8xl">🎉</div>
+            <h2 class="text-5xl font-black text-emerald-600" data-i18n="amazingWork">Amazing Work!</h2>
+            <div class="card rounded-3xl border-2 p-6 max-w-md mx-auto space-y-3">
+                <div class="text-2xl font-bold"><span data-i18n="youEarned">You earned</span> <span id="endStars" class="text-amber-500">0</span> ⭐</div>
+                <div id="endTokenDisplay" class="flex justify-center gap-1 flex-wrap text-4xl"></div>
+                <div id="endStats" class="text-lg opacity-70"></div>
+            </div>
+            <div class="flex gap-4 justify-center flex-wrap">
+                <button onclick="showScreen('homeScreen')" class="px-10 py-4 btn-primary font-black text-xl rounded-3xl shadow-lg">🏠</button>
+                <button onclick="replaySession()" class="px-10 py-4 bg-emerald-500 text-white font-black text-xl rounded-3xl shadow-lg">🔄</button>
+            </div>
+        </div>
+
+        <!-- ============ SETTINGS ============ -->
+        <div id="settingsScreen" class="screen space-y-4">
+            <h2 class="text-3xl font-black text-center">⚙️ <span data-i18n="settings">Settings</span></h2>
+            
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg">🔊 <span data-i18n="speechSpeed">Speech Speed</span></h3>
+                <input type="range" id="speechRate" min="0.5" max="1.5" step="0.1" value="0.9" onchange="updateSpeechRate()" class="w-full">
+                <div class="text-center font-bold" id="speechRateLabel">0.9x</div>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg">🔢 <span data-i18n="itemsPerSession">Items per session</span></h3>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="setItemCount(3)" class="item-count-btn p-3 card border-2 rounded-xl font-bold">3</button>
+                    <button onclick="setItemCount(5)" class="item-count-btn p-3 card border-2 rounded-xl font-bold">5</button>
+                    <button onclick="setItemCount(10)" class="item-count-btn p-3 card border-2 rounded-xl font-bold">10</button>
+                    <button onclick="setItemCount(15)" class="item-count-btn p-3 card border-2 rounded-xl font-bold">15</button>
+                </div>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg">🤖 <span data-i18n="aiAdaptive">AI Adaptive Difficulty</span></h3>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="adaptiveToggle" onchange="toggleAdaptive()" class="w-5 h-5">
+                    <span data-i18n="autoAdjust">Auto-adjust difficulty based on performance</span>
+                </label>
+                <div id="adaptiveInfo" class="text-sm opacity-70"></div>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg">👁️ <span data-i18n="eyeGazeSettings">Eye Gaze Settings</span></h3>
+                <button onclick="recalibrateGaze()" class="w-full py-3 bg-indigo-100 font-bold rounded-2xl">🎯 Calibrate Eye Gaze</button>
+                <div>
+                    <label class="font-bold text-sm">Dwell Time: <span id="dwellLabel">1.2s</span></label>
+                    <input type="range" id="dwellTime" min="0.5" max="3" step="0.1" value="1.2" onchange="updateDwell()" class="w-full">
+                </div>
+            </div>
+
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <h3 class="font-bold text-lg">📝 <span data-i18n="customList">Custom Word/Sentence List</span></h3>
+                <textarea id="customList" class="w-full p-4 card border-2 rounded-2xl font-mono text-sm" rows="6" placeholder="hello&#10;my name is..."></textarea>
+                <button onclick="saveCustomList()" class="w-full py-3 btn-primary font-bold rounded-2xl">💾 <span data-i18n="save">Save</span></button>
+            </div>
+        </div>
+
+        <!-- ============ TEACHER LOGIN ============ -->
+        <div id="teacherLogin" class="screen space-y-6 max-w-md mx-auto text-center">
+            <h2 class="text-3xl font-black">👩‍🏫 <span data-i18n="teacherPortal">Teacher Portal</span></h2>
+            <div class="card rounded-3xl border-2 p-6 space-y-4">
+                <p class="text-sm opacity-70" data-i18n="enterPin">Enter teacher PIN (default: 1234)</p>
+                <input type="password" id="teacherPin" maxlength="6" class="w-full p-4 text-center text-3xl font-black card border-4 rounded-2xl tracking-widest" placeholder="••••">
+                <button onclick="teacherLogin()" class="w-full py-3 btn-primary font-bold rounded-2xl">🔓 <span data-i18n="login">Login</span></button>
+                <button onclick="showScreen('homeScreen')" class="w-full py-2 text-sm opacity-70">Cancel</button>
+            </div>
+        </div>
+
+        <!-- ============ TEACHER DASHBOARD ============ -->
+        <div id="teacherDashboard" class="screen space-y-4">
+            <div class="flex justify-between items-center flex-wrap gap-2">
+                <h2 class="text-3xl font-black">👩‍🏫 <span data-i18n="dashboard">Dashboard</span></h2>
+                <div class="flex gap-2">
+                    <button onclick="addStudent()" class="px-4 py-2 btn-primary rounded-xl font-bold">➕ <span data-i18n="addStudent">Add Student</span></button>
+                    <button onclick="teacherLogout()" class="px-4 py-2 bg-slate-200 rounded-xl font-bold">🚪</button>
+                </div>
+            </div>
+            <div class="card rounded-3xl border-2 p-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div><div class="text-3xl font-black text-indigo-600" id="statStudents">0</div><div class="text-sm opacity-70">Students</div></div>
+                    <div><div class="text-3xl font-black text-emerald-600" id="statSessions">0</div><div class="text-sm opacity-70">Sessions</div></div>
+                    <div><div class="text-3xl font-black text-amber-600" id="statAccuracy">0%</div><div class="text-sm opacity-70">Avg Accuracy</div></div>
+                </div>
+            </div>
+            <div id="studentList" class="space-y-2"></div>
+        </div>
+
+        <!-- ============ STUDENT DETAIL ============ -->
+        <div id="studentDetail" class="screen space-y-4">
+            <div class="flex justify-between items-center flex-wrap gap-2">
+                <h2 class="text-3xl font-black">👤 <span id="studentName">Student</span></h2>
+                <div class="flex gap-2">
+                    <button onclick="generateReport()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold">📄 <span data-i18n="generateReport">Generate PDF Report</span></button>
+                    <button onclick="showScreen('teacherDashboard')" class="px-4 py-2 bg-slate-200 rounded-xl font-bold">⬅️</button>
+                </div>
+            </div>
+            <div class="card rounded-3xl border-2 p-6 space-y-3">
+                <div><span class="font-bold">IEP Goals:</span> <span id="studentGoals" class="italic"></span></div>
+                <div><span class="font-bold">Grade:</span> <span id="studentGrade"></span></div>
+                <div><span class="font-bold">Primary Input:</span> <span id="studentInput"></span></div>
+                <div><span class="font-bold">Total Stars:</span> <span id="studentStars" class="text-amber-500"></span></div>
+            </div>
+            <div class="card rounded-3xl border-2 p-6">
+                <h3 class="font-bold text-lg mb-3">📊 <span data-i18n="recentProgress">Recent Progress</span></h3>
+                <div id="studentProgress" class="space-y-2 max-h-96 overflow-y-auto"></div>
+            </div>
+            <div class="card rounded-3xl border-2 p-6">
+                <h3 class="font-bold text-lg mb-3">🤖 <span data-i18n="aiInsights">AI Insights</span></h3>
+                <div id="studentInsights" class="space-y-2"></div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+// ============================================================
+// TRANSLATIONS
+// ============================================================
+const translations = {
+    en: { appTitle: "Inclusive Literacy Hub", chooseActivity: "What shall we practice?", sentences: "Sentences", sightWords: "Sight Words", phonics: "Phonics", matchWords: "Match Words", buildSentences: "Build Sentences", handwriting: "Handwriting", socialStories: "Social Stories", myWords: "My Words", myStars: "My Stars", aiCoach: "AI Learning Coach", howAnswer: "✋ How will you answer?", howMuchHelp: "💡 How much help?", showPictures: "🖼️ Show pictures?", letsGo: "Let's Go!", hearIt: "Hear It", slow: "Slow", soundIt: "Sound It", hint: "Hint", thatsWhat: "That's what I said", lookAt: "Look at the letters. Hold your gaze to select.", recalibrate: "Recalibrate", traceLetter: "Trace the letter:", useFinger: "Use your finger or mouse to trace", check: "Check", back: "Back", readAloud: "Read Aloud", next: "Next", matchPictureWord: "Match the picture to the word!", amazingWork: "Amazing Work!", youEarned: "You earned", settings: "Settings", speechSpeed: "Speech Speed", itemsPerSession: "Items per session", aiAdaptive: "AI Adaptive Difficulty", autoAdjust: "Auto-adjust difficulty based on performance", eyeGazeSettings: "Eye Gaze Settings", customList: "Custom Word/Sentence List", save: "Save", teacherPortal: "Teacher Portal", enterPin: "Enter teacher PIN (default: 1234)", login: "Login", dashboard: "Dashboard", addStudent: "Add Student", generateReport: "Generate PDF Report", recentProgress: "Recent Progress", aiInsights: "AI Insights" },
+    es: { appTitle: "Centro de Lectoescritura", chooseActivity: "¿Qué practicamos?", sentences: "Oraciones", sightWords: "Palabras", phonics: "Fónica", matchWords: "Emparejar", buildSentences: "Construir", handwriting: "Escritura", socialStories: "Cuentos Sociales", myWords: "Mis Palabras", myStars: "Mis Estrellas", aiCoach: "Coach IA", howAnswer: "✋ ¿Cómo responderás?", howMuchHelp: "💡 ¿Cuánta ayuda?", showPictures: "🖼️ ¿Mostrar imágenes?", letsGo: "¡Vamos!", hearIt: "Escuchar", slow: "Lento", soundIt: "Sonar", hint: "Pista", thatsWhat: "Eso dije", lookAt: "Mira las letras. Mantén la mirada.", recalibrate: "Recalibrar", traceLetter: "Traza la letra:", useFinger: "Usa tu dedo o ratón", check: "Revisar", back: "Atrás", readAloud: "Leer en Voz Alta", next: "Siguiente", matchPictureWord: "¡Empareja imagen y palabra!", amazingWork: "¡Excelente!", youEarned: "Ganaste", settings: "Ajustes", speechSpeed: "Velocidad de Voz", itemsPerSession: "Elementos por sesión", aiAdaptive: "Dificultad IA Adaptativa", autoAdjust: "Ajustar según rendimiento", eyeGazeSettings: "Config. Seguimiento Ocular", customList: "Lista Personalizada", save: "Guardar", teacherPortal: "Portal del Profesor", enterPin: "PIN del profesor (predet.: 1234)", login: "Entrar", dashboard: "Panel", addStudent: "Añadir Alumno", generateReport: "Generar PDF", recentProgress: "Progreso Reciente", aiInsights: "Análisis IA" },
+    fr: { appTitle: "Centre de Littératie", chooseActivity: "Que pratiquer?", sentences: "Phrases", sightWords: "Mots", phonics: "Phonique", matchWords: "Associer", buildSentences: "Construire", handwriting: "Écriture", socialStories: "Histoires Sociales", myWords: "Mes Mots", myStars: "Mes Étoiles", aiCoach: "Coach IA", howAnswer: "✋ Comment répondre?", howMuchHelp: "💡 Combien d'aide?", showPictures: "🖼️ Montrer images?", letsGo: "C'est parti!", hearIt: "Écouter", slow: "Lent", soundIt: "Épeler", hint: "Indice", thatsWhat: "C'est ce que j'ai dit", lookAt: "Regarde les lettres. Fixe pour choisir.", recalibrate: "Recalibrer", traceLetter: "Trace la lettre:", useFinger: "Utilise ton doigt", check: "Vérifier", back: "Retour", readAloud: "Lire à Voix Haute", next: "Suivant", matchPictureWord: "Associe image et mot!", amazingWork: "Bravo!", youEarned: "Tu as gagné", settings: "Paramètres", speechSpeed: "Vitesse Voix", itemsPerSession: "Éléments par session", aiAdaptive: "Difficulté IA Adaptative", autoAdjust: "Ajuster selon performance", eyeGazeSettings: "Config. Suivi Oculaire", customList: "Liste Personnalisée", save: "Sauver", teacherPortal: "Portail Enseignant", enterPin: "PIN enseignant (défaut: 1234)", login: "Connexion", dashboard: "Tableau de Bord", addStudent: "Ajouter Élève", generateReport: "Générer PDF", recentProgress: "Progrès Récents", aiInsights: "Analyses IA" },
+    ar: { appTitle: "مركز محو الأمية", chooseActivity: "ماذا نتدرب؟", sentences: "جمل", sightWords: "كلمات", phonics: "صوتيات", matchWords: "مطابقة", buildSentences: "بناء جمل", handwriting: "خط اليد", socialStories: "قصص اجتماعية", myWords: "كلماتي", myStars: "نجومى", aiCoach: "مدرب ذكي", howAnswer: "✋ كيف تجيب؟", howMuchHelp: "💋 كم مساعدة؟", showPictures: "🖼️ إظهار الصور؟", letsGo: "هيا!", hearIt: "استمع", slow: "بطيء", soundIt: "تهجئة", hint: "تلميح", thatsWhat: "هذا ما قلته", lookAt: "انظر إلى الحروف. ثبت نظرك.", recalibrate: "إعادة معايرة", traceLetter: "تتبع الحرف:", useFinger: "استخدم إصبعك", check: "تحقق", back: "رجوع", readAloud: "اقرأ بصوت عالٍ", next: "التالي", matchPictureWord: "طابق الصورة بالكلمة!", amazingWork: "عمل رائع!", youEarned: "لقد كسبت", settings: "إعدادات", speechSpeed: "سرعة الكلام", itemsPerSession: "عناصر لكل جلسة", aiAdaptive: "صعوبة تكيفية", autoAdjust: "تعديل تلقائي حسب الأداء", eyeGazeSettings: "إعدادات تتبع العين", customList: "قائمة مخصصة", save: "حفظ", teacherPortal: "بوابة المعلم", enterPin: "أدخل رمز المعلم (افتراضي: 1234)", login: "دخول", dashboard: "لوحة التحكم", addStudent: "إضافة طالب", generateReport: "توليد PDF", recentProgress: "التقدم الأخير", aiInsights: "رؤى ذكية" },
+    zh: { appTitle: "包容性读写中心", chooseActivity: "练习什么？", sentences: "句子", sightWords: "视觉词", phonics: "拼音", matchWords: "配对", buildSentences: "造句", handwriting: "书写", socialStories: "社交故事", myWords: "我的词", myStars: "我的星星", aiCoach: "AI教练", howAnswer: "✋ 如何回答？", howMuchHelp: "💡 多少帮助？", showPictures: "🖼️ 显示图片？", letsGo: "开始！", hearIt: "听", slow: "慢速", soundIt: "拼读", hint: "提示", thatsWhat: "我说的就是这个", lookAt: "看字母，注视选择。", recalibrate: "重新校准", traceLetter: "描字母：", useFinger: "用手指或鼠标", check: "检查", back: "返回", readAloud: "朗读", next: "下一个", matchPictureWord: "将图片与单词配对！", amazingWork: "太棒了！", youEarned: "你获得了", settings: "设置", speechSpeed: "语速", itemsPerSession: "每次项目数", aiAdaptive: "AI自适应难度", autoAdjust: "根据表现自动调整", eyeGazeSettings: "眼动设置", customList: "自定义列表", save: "保存", teacherPortal: "教师门户", enterPin: "输入教师PIN（默认：1234）", login: "登录", dashboard: "仪表板", addStudent: "添加学生", generateReport: "生成PDF报告", recentProgress: "近期进展", aiInsights: "AI洞察" },
+    pa: { appTitle: "ਸਮਾਵੇਸੀ ਸਾਖਰਤਾ ਹੱਬ", chooseActivity: "ਕੀ ਅਭਿਆਸ ਕਰੀਏ?", sentences: "ਵਾਕ", sightWords: "ਸ਼ਬਦ", phonics: "ਧ्वਨੀ", matchWords: "ਮਿਲਾਨ", buildSentences: "ਵਾਕ ਬਣਾਓ", handwriting: "ਹੱਥ-ਲਿਖਤ", socialStories: "ਸামਾਜਿਕ ਕਹਾਣੀਆਂ", myWords: "ਮੇਰੇ ਸ਼ਬਦ", myStars: "ਮੇਰੇ ਤਾਰੇ", aiCoach: "AI ਕੋਚ", howAnswer: "✋ ਕਿਵੇਂ ਜਵਾਬ ਦਿਓਗੇ?", howMuchHelp: "💡 ਕਿੰਨੀ ਮਦਦ?", showPictures: "🖼️ ਤਸਵੀਰਾਂ ਦਿਖਾਈਏ?", letsGo: "ਚੱਲੋ!", hearIt: "ਸੁਣੋ", slow: "ਹੌਲੀ", soundIt: "ਧਵਨੀ", hint: "ਸੰਕੇਤ", thatsWhat: "ਮੈਂ ਇਹੀ ਕਿਹਾ", lookAt: "ਅੱਖਰਾਂ ਵੱਲ ਦੇਖੋ।", recalibrate: "ਮੁੜ ਕੈਲੀਬਰੇਟ", traceLetter: "ਅੱਖਰ ਟਰੇਸ ਕਰੋ:", useFinger: "ਉਂਗਲ ਵਰਤੋ", check: "ਜਾਂਚ", back: "ਪਿੱਛੇ", readAloud: "ਉੱਚੀ ਪੜ੍ਹੋ", next: "ਅਗਲਾ", matchPictureWord: "ਤਸਵੀਰ ਨੂੰ ਸ਼ਬਦ ਨਾਲ ਮਿਲਾਓ!", amazingWork: "ਵਧੀਆ!", youEarned: "ਤੁਸੀਂ ਕਮਾਏ", settings: "ਸੈਟਿੰਗਜ਼", speechSpeed: "ਬੋਲ ਦੀ ਗਤੀ", itemsPerSession: "ਪ੍ਰਤੀ ਸ਼ੈਸ਼ਨ", aiAdaptive: "AI ਅਨੁਕੂਲ ਮੁਸ਼ਕਲ", autoAdjust: "ਪ੍ਰਦਰਸ਼ਨ ਅਨੁਸਾਰ", eyeGazeSettings: "ਅੱਖ ਟਰੈਕਿੰਗ", customList: "ਕਸਟਮ ਸੂਚੀ", save: "ਸੇਵ", teacherPortal: "ਅਧਿਆਪਕ ਪੋਰਟਲ", enterPin: "PIN ਦਰਜ ਕਰੋ (ਡਿਫ਼ਾਲਟ: 1234)", login: "ਲਾਗਇਨ", dashboard: "ਡੈਸ਼ਬੋਰਡ", addStudent: "ਵਿਦਿਆਰਥੀ ਜੋੜੋ", generateReport: "PDF ਰਿਪੋਰਟ", recentProgress: "ਤਾਜ਼ਾ ਤਰੱਕੀ", aiInsights: "AI ਜਾਣਕਾਰੀ" }
+};
+
+// ============================================================
+// DATA BANKS
+// ============================================================
+const sentenceBank = [
+    { text: "I need help.", emoji: "🆘" }, { text: "Where is the exit?", emoji: "🚪" },
+    { text: "I want to eat.", emoji: "🍽️" }, { text: "Look at the time.", emoji: "⏰" },
+    { text: "It is a nice day.", emoji: "☀️" }, { text: "I feel happy.", emoji: "😊" },
+    { text: "Can I have water?", emoji: "💧" }, { text: "I need a break.", emoji: "🧘" }
+];
+
+const wordBank = [
+    { text: "the", emoji: "👉" }, { text: "and", emoji: "➕" }, { text: "a", emoji: "1️⃣" },
+    { text: "to", emoji: "➡️" }, { text: "is", emoji: "✅" }, { text: "you", emoji: "🫵" },
+    { text: "cat", emoji: "🐱" }, { text: "dog", emoji: "🐶" }, { text: "sun", emoji: "☀️" },
+    { text: "run", emoji: "🏃" }, { text: "hat", emoji: "🎩" }, { text: "cup", emoji: "☕" },
+    { text: "red", emoji: "🔴" }, { text: "big", emoji: "🐘" }, { text: "mom", emoji: "👩" },
+    { text: "dad", emoji: "👨" }
+];
+
+const phonicsBank = [
+    { text: "a", emoji: "🍎" }, { text: "b", emoji: "🐻" }, { text: "c", emoji: "🐱" },
+    { text: "d", emoji: "🐶" }, { text: "m", emoji: "🐵" }, { text: "s", emoji: "🐍" },
+    { text: "t", emoji: "🐯" }, { text: "p", emoji: "🐷" }
+];
+
+const handwritingBank = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','1','2','3'];
+
+// Social Stories - evidence-based format (Carol Gray model)
+const socialStories = [
+    {
+        title: "🧼 Washing My Hands",
+        titleEs: "🧼 Lavarme las Manos",
+        pages: [
+            { emoji: "🧼", text: "I wash my hands to keep my body healthy.", textEs: "Lavo mis manos para mantener mi cuerpo sano." },
+            { emoji: "🚰", text: "I turn on the water. The water feels wet.", textEs: "Abro el agua. El agua se siente mojada." },
+            { emoji: "🧴", text: "I push the soap. One push is enough.", textEs: "Presiono el jabón. Una vez es suficiente." },
+            { emoji: "👐", text: "I rub my hands together. I count to 20.", textEs: "Froto mis manos. Cuento hasta 20." },
+            { emoji: "🚰", text: "I rinse the soap off with water.", textEs: "Enjuago el jabón con agua." },
+            { emoji: "🧻", text: "I dry my hands with a clean towel.", textEs: "Seco mis manos con una toalla limpia." },
+            { emoji: "✨", text: "My hands are clean! I did a great job.", textEs: "¡Mis manos están limpias! Lo hice muy bien." }
+        ]
+    },
+    {
+        title: "📚 Raising My Hand in Class",
+        titleEs: "📚 Levantar la Mano en Clase",
+        pages: [
+            { emoji: "🏫", text: "In class, the teacher asks questions.", textEs: "En clase, el profesor hace preguntas." },
+            { emoji: "🤔", text: "Sometimes I know the answer. That feels good!", textEs: "A veces sé la respuesta. ¡Eso se siente bien!" },
+            { emoji: "✋", text: "I raise my hand quietly. I wait.", textEs: "Levanto mi mano en silencio. Espero." },
+            { emoji: "👀", text: "The teacher may call on me. Or someone else. Both are okay.", textEs: "El profesor puede llamarme. O a otro. Ambos está bien." },
+            { emoji: "🗣️", text: "When it is my turn, I share my answer.", textEs: "Cuando es mi turno, comparto mi respuesta." },
+            { emoji: "👏", text: "Raising my hand helps everyone learn.", textEs: "Levantar la mano ayuda a todos a aprender." }
+        ]
+    },
+    {
+        title: "🛒 Waiting My Turn",
+        titleEs: "🛒 Esperar Mi Turno",
+        pages: [
+            { emoji: "⏳", text: "Sometimes I have to wait. Waiting can feel hard.", textEs: "A veces tengo que esperar. Esperar puede ser difícil." },
+            { emoji: "😤", text: "When I wait, I might feel frustrated. That is okay.", textEs: "Cuando espero, puedo sentirme frustrado. Está bien." },
+            { emoji: "🧘", text: "I can take a deep breath. In... and out.", textEs: "Puedo respirar profundo. Adentro... y afuera." },
+            { emoji: "👀", text: "I watch to see whose turn is next.", textEs: "Observo de quién es el turno." },
+            { emoji: "⏰", text: "Soon, it will be my turn.", textEs: "Pronto, será mi turno." },
+            { emoji: "🎉", text: "Waiting shows I am patient. I am proud of myself!", textEs: "Esperar muestra que soy paciente. ¡Estoy orgulloso!" }
+        ]
+    },
+    {
+        title: "🔊 When It's Too Loud",
+        titleEs: "🔊 Cuando Hay Mucho Ruido",
+        pages: [
+            { emoji: "🔊", text: "Sometimes places are very loud. That can feel overwhelming.", textEs: "A veces los lugares son muy ruidosos. Eso puede ser abrumador." },
+            { emoji: "😣", text: "My body might feel tense. My ears might hurt.", textEs: "Mi cuerpo puede sentirse tenso. Mis oídos pueden doler." },
+            { emoji: "🙋", text: "I can tell a grown-up: 'It is too loud.'", textEs: "Puedo decirle a un adulto: 'Hay mucho ruido.'" },
+            { emoji: "🎧", text: "I can use my noise-reducing headphones.", textEs: "Puedo usar mis audífonos que reducen el ruido." },
+            { emoji: "🚪", text: "I can ask for a quiet break.", textEs: "Puedo pedir un descanso tranquilo." },
+            { emoji: "🧘", text: "Taking care of my body is smart and okay.", textEs: "Cuidar mi cuerpo es inteligente y está bien." }
+        ]
+    },
+    {
+        title: "👋 Saying Hello",
+        titleEs: "👋 Decir Hola",
+        pages: [
+            { emoji: "👋", text: "When I see someone I know, I can say hello.", textEs: "Cuando veo a alguien que conozco, puedo decir hola." },
+            { emoji: "😊", text: "I can smile. Smiling shows I am friendly.", textEs: "Puedo sonreír. Sonreír muestra que soy amable." },
+            { emoji: "🗣️", text: "I can say 'Hi!' or 'Hello!'", textEs: "Puedo decir '¡Hola!'" },
+            { emoji: "🖐️", text: "Some people like to wave. Some like to high-five.", textEs: "Algunos saludan con la mano. Otros chocan los cinco." },
+            { emoji: "❓", text: "I can watch what the other person does and follow their lead.", textEs: "Puedo observar qué hace la otra persona y seguirla." },
+            { emoji: "💚", text: "Saying hello makes new friends possible!", textEs: "¡Decir hola hace posibles nuevos amigos!" }
+        ]
+    }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+    mode: 'sentences', inputMethod: 'keyboard', supportLevel: 'hints',
+    showVisuals: true, wordCase: 'lower', itemCount: 5, muted: false,
+    speechRate: 0.9, theme: 'default', lang: 'en',
+    tokens: parseInt(localStorage.getItem('tokens') || '0'),
+    activeItems: [], currentIndex: 0, sessionCorrect: 0, sessionTrials: 0,
+    currentHintLevel: 0, switchItems: [], switchIndex: 0, switchInterval: null,
+    recognition: null, isListening: false, oskValue: '', switchValue: '',
+    eyegazeValue: '', eyegazeActive: false, dwellTimeout: null, dwellTime: 1200,
+    adaptiveEnabled: localStorage.getItem('adaptive') === 'true',
+    currentStudentId: null, teacherLoggedIn: false,
+    // Handwriting
+    hwItems: [], hwIndex: 0, hwStrokes: [], hwDrawing: false, hwLastPoint: null,
+    // Stories
+    storyIndex: 0, storyPage: 0, currentStory: null,
+    // Build/Match
+    buildState: { items: [], current: 0, correct: 0, answer: [] },
+    matchState: { items: [], current: 0, correct: 0 }
+};
+
+// ============================================================
+// I18N
+// ============================================================
+function changeLanguage(lang) {
+    state.lang = lang;
+    localStorage.setItem('lang', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            el.innerText = translations[lang][key];
+        }
+    });
+}
+
+// ============================================================
+// SCREEN MANAGEMENT
+// ============================================================
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.speechSynthesis.cancel();
+    stopSwitchScan();
+    stopEyeGaze();
+    if (state.recognition && state.isListening) stopVoice();
+    if (id === 'homeScreen') { updateTokenDisplay(); updateAdaptiveInsight(); }
+    if (id === 'settingsScreen') loadSettingsUI();
+    if (id === 'teacherDashboard') renderTeacherDashboard();
+}
+
+// ============================================================
+// PREFERENCES
+// ============================================================
+function toggleMute() {
+    state.muted = !state.muted;
+    document.getElementById('muteBtn').innerText = state.muted ? '🔇' : '🔊';
+    if (state.muted) window.speechSynthesis.cancel();
+}
+
+function cycleTheme() {
+    const themes = ['default', 'calm', 'dark', 'highcontrast'];
+    const i = themes.indexOf(state.theme);
+    state.theme = themes[(i + 1) % themes.length];
+    document.body.setAttribute('data-theme', state.theme === 'default' ? '' : state.theme);
+    localStorage.setItem('theme', state.theme);
+}
+
+function updateSpeechRate() {
+    state.speechRate = parseFloat(document.getElementById('speechRate').value);
+    document.getElementById('speechRateLabel').innerText = state.speechRate + 'x';
+    localStorage.setItem('speechRate', state.speechRate);
+}
+
+function setItemCount(n) {
+    state.itemCount = n;
+    localStorage.setItem('itemCount', n);
+    document.querySelectorAll('.item-count-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
+    if (event && event.target) event.target.classList.add('border-indigo-500', 'bg-indigo-100');
+}
+
+function saveCustomList() {
+    localStorage.setItem('customList', document.getElementById('customList').value);
+    alert('✅ Saved!');
+}
+
+function loadSettingsUI() {
+    document.getElementById('speechRate').value = state.speechRate;
+    document.getElementById('speechRateLabel').innerText = state.speechRate + 'x';
+    document.getElementById('customList').value = localStorage.getItem('customList') || '';
+    document.getElementById('adaptiveToggle').checked = state.adaptiveEnabled;
+    document.getElementById('dwellTime').value = state.dwellTime / 1000;
+    document.getElementById('dwellLabel').innerText = (state.dwellTime / 1000) + 's';
+    updateAdaptiveInfo();
+}
+
+function toggleAdaptive() {
+    state.adaptiveEnabled = document.getElementById('adaptiveToggle').checked;
+    localStorage.setItem('adaptive', state.adaptiveEnabled);
+    updateAdaptiveInfo();
+}
+
+function updateDwell() {
+    state.dwellTime = parseFloat(document.getElementById('dwellTime').value) * 1000;
+    document.getElementById('dwellLabel').innerText = (state.dwellTime / 1000) + 's';
+    localStorage.setItem('dwellTime', state.dwellTime);
+}
+
+function updateAdaptiveInfo() {
+    const el = document.getElementById('adaptiveInfo');
+    if (!el) return;
+    if (state.adaptiveEnabled) {
+        const stats = getAdaptiveStats();
+        el.innerHTML = `✅ Enabled. Recent accuracy: <b>${stats.accuracy}%</b> → Level: <b>${stats.level}</b>`;
+    } else {
+        el.innerHTML = '⏸️ Disabled. Difficulty stays fixed.';
+    }
+}
+
+// ============================================================
+// AI ADAPTIVE DIFFICULTY
+// ============================================================
+function getAdaptiveStats() {
+    const data = JSON.parse(localStorage.getItem('progressData') || '[]');
+    const recent = data.slice(-20);
+    if (!recent.length) return { accuracy: 0, level: 'medium', difficulty: 1 };
+    const correct = recent.filter(d => d.correct).length;
+    const accuracy = Math.round((correct / recent.length) * 100);
+    let level = 'medium', difficulty = 1;
+    if (accuracy < 50) { level = 'easy'; difficulty = 0.5; }
+    else if (accuracy > 80) { level = 'hard'; difficulty = 1.5; }
+    return { accuracy, level, difficulty };
+}
+
+function updateAdaptiveInsight() {
+    if (!state.adaptiveEnabled) {
+        document.getElementById('adaptiveInsight').classList.add('hidden');
+        return;
+    }
+    const stats = getAdaptiveStats();
+    const el = document.getElementById('adaptiveInsight');
+    const text = document.getElementById('adaptiveText');
+    el.classList.remove('hidden');
+    let msg = '';
+    if (stats.accuracy === 0) msg = "Let's start learning! I'll adjust as we go.";
+    else if (stats.accuracy < 50) msg = `🌱 You're finding things tricky. I'll make it easier with more hints. Accuracy: ${stats.accuracy}%`;
+    else if (stats.accuracy > 80) msg = `🚀 You're doing great! I'll challenge you more. Accuracy: ${stats.accuracy}%`;
+    else msg = `👍 Steady progress! Accuracy: ${stats.accuracy}%. Keep going!`;
+    text.innerText = msg;
+}
+
+function applyAdaptiveSettings() {
+    if (!state.adaptiveEnabled) return;
+    const stats = getAdaptiveStats();
+    // Auto-adjust support level
+    if (stats.accuracy < 50 && state.supportLevel === 'independent') {
+        state.supportLevel = 'hints';
+    } else if (stats.accuracy > 85 && state.supportLevel === 'errorless') {
+        state.supportLevel = 'hints';
+    }
+    // Show level badge
+    const badge = document.getElementById('levelBadge');
+    if (badge) {
+        badge.innerHTML = `<span class="adaptive-badge level-${stats.level}">${stats.level.toUpperCase()} • ${stats.accuracy}%</span>`;
+    }
+}
+
+// ============================================================
+// SPEECH
+// ============================================================
+function speak(text, rate = null) {
+    if (state.muted || !text) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = rate || state.speechRate;
+    // Set language based on current language
+    const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN', pa: 'pa-IN' };
+    u.lang = langMap[state.lang] || 'en-US';
+    window.speechSynthesis.speak(u);
+}
+
+function speakCurrent() { speak(document.getElementById('target').innerText); }
+function speakSlow() { speak(document.getElementById('target').innerText, 0.5); }
+function soundOut() {
+    const t = document.getElementById('target').innerText;
+    if (!t) return;
+    t.split(' ').forEach((w, i) => setTimeout(() => speak(w, 0.6), i * 1200));
+}
+
+// ============================================================
+// MODE SELECTION
+// ============================================================
+function startMode(m) {
+    state.mode = m;
+    if (m === 'matching') { showScreen('matchingScreen'); startMatching(); return; }
+    if (m === 'build') { showScreen('buildScreen'); startBuild(); return; }
+    if (m === 'handwriting') { showScreen('handwritingScreen'); startHandwriting(); return; }
+    if (m === 'stories') { showScreen('storiesScreen'); startStories(); return; }
+    document.getElementById('setupTitle').innerText = 
+        { sentences: '📖 Sentences', words: '🔤 Sight Words', phonics: '🔊 Phonics', custom: '⭐ My Words' }[m] || 'Setup';
+    document.getElementById('caseSelector').classList.toggle('hidden', m !== 'words');
+    showScreen('setupScreen');
+}
+
+function setInputMethod(m) {
+    state.inputMethod = m;
+    document.querySelectorAll('.input-method-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100');
+}
+
+function setSupport(s) {
+    state.supportLevel = s;
+    document.querySelectorAll('.support-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100');
+}
+
+function setVisuals(v) {
+    state.showVisuals = v;
+    document.querySelectorAll('.visual-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100');
+}
+
+function setCase(c) {
+    state.wordCase = c;
+    document.querySelectorAll('.case-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100');
+}
+
+// ============================================================
+// SESSION
+// ============================================================
+function beginSession() {
+    let source;
+    if (state.mode === 'custom') {
+        const raw = (localStorage.getItem('customList') || '').split('\n').map(s => s.trim()).filter(Boolean);
+        if (!raw.length) { alert('Add words in Settings first!'); return; }
+        source = raw.map(t => ({ text: t, emoji: '⭐' }));
+    } else if (state.mode === 'sentences') source = sentenceBank;
+    else if (state.mode === 'phonics') source = phonicsBank;
+    else source = wordBank;
+
+    // Adaptive: if easy, pick shorter items; if hard, pick longer
+    if (state.adaptiveEnabled) {
+        const stats = getAdaptiveStats();
+        if (stats.level === 'easy') source = [...source].sort((a, b) => a.text.length - b.text.length);
+        else if (stats.level === 'hard') source = [...source].sort((a, b) => b.text.length - a.text.length);
+    }
+
+    state.activeItems = [...source].sort(() => 0.5 - Math.random()).slice(0, state.itemCount);
+    state.currentIndex = 0;
+    state.sessionCorrect = 0;
+    state.sessionTrials = 0;
+    showScreen('gameScreen');
+    applyAdaptiveSettings();
+    setupGameScreen();
+}
+
+function setupGameScreen() {
+    const item = state.activeItems[state.currentIndex];
+    let display = item.text;
+    if (state.mode === 'words') {
+        if (state.wordCase === 'upper') display = display.toUpperCase();
+        else if (state.wordCase === 'sentence') display = display.charAt(0).toUpperCase() + display.slice(1);
+        else display = display.toLowerCase();
+    }
+    document.getElementById('target').innerText = display;
+    const vis = document.getElementById('targetVisual');
+    if (state.showVisuals && item.emoji) { vis.innerText = item.emoji; vis.classList.remove('hidden'); }
+    else vis.classList.add('hidden');
+
+    document.getElementById('hintBtn').classList.toggle('hidden', state.supportLevel === 'independent');
+    state.currentHintLevel = 0;
+
+    document.getElementById('progress').innerText = `Item ${state.currentIndex + 1} of ${state.activeItems.length}`;
+    document.getElementById('progressBar').style.width = ((state.currentIndex) / state.activeItems.length * 100) + '%';
+    updateTokenBar();
+
+    setupInputMethod();
+
+    const input = document.getElementById('studentInput');
+    input.value = '';
+    input.className = "w-full font-bold py-6 px-8 rounded-3xl border-4 text-center text-3xl outline-none card hidden";
+    document.getElementById('msg').innerText = '';
+
+    setTimeout(() => speak(display), 300);
+}
+
+function setupInputMethod() {
+    ['studentInput', 'voiceInput', 'onscreenInput', 'switchInput', 'eyegazeInput'].forEach(id =>
+        document.getElementById(id).classList.add('hidden'));
+
+    if (state.inputMethod === 'keyboard') {
+        document.getElementById('studentInput').classList.remove('hidden');
+        document.getElementById('studentInput').focus();
+    } else if (state.inputMethod === 'voice') {
+        document.getElementById('voiceInput').classList.remove('hidden');
+        initVoice();
+    } else if (state.inputMethod === 'onscreen') {
+        document.getElementById('onscreenInput').classList.remove('hidden');
+        buildOSK('onscreenKeyboard', oskType);
+        state.oskValue = '';
+        document.getElementById('onscreenDisplay').innerText = '';
+    } else if (state.inputMethod === 'switch') {
+        document.getElementById('switchInput').classList.remove('hidden');
+        state.switchValue = '';
+        document.getElementById('switchDisplay').innerText = '';
+        startSwitchScan();
+    } else if (state.inputMethod === 'eyegaze') {
+        document.getElementById('eyegazeInput').classList.remove('hidden');
+        buildOSK('eyegazeKeyboard', eyegazeType, true);
+        state.eyegazeValue = '';
+        document.getElementById('eyegazeDisplay').innerText = '';
+        startEyeGaze();
+    }
+}
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('studentInput').addEventListener('input', (e) => {
+        if (e.target.value.length >= document.getElementById('target').innerText.length) {
+            checkAnswer(e.target.value);
+        }
+    });
+});
+
+// ============================================================
+// VOICE
+// ============================================================
+function initVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        document.getElementById('voiceStatus').innerText = '⚠️ Voice not supported. Try Chrome.';
+        return;
+    }
+    if (!state.recognition) {
+        state.recognition = new SR();
+        state.recognition.continuous = false;
+        state.recognition.interimResults = true;
+        const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN', pa: 'pa-IN' };
+        state.recognition.lang = langMap[state.lang] || 'en-US';
+        state.recognition.onresult = (e) => {
+            const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+            document.getElementById('voiceResult').innerText = transcript;
+            document.getElementById('voiceSubmit').classList.remove('hidden');
+        };
+        state.recognition.onend = () => {
+            state.isListening = false;
+            document.getElementById('micBtn').classList.remove('mic-listening', 'bg-red-700');
+            document.getElementById('micBtn').classList.add('bg-red-500');
+        };
+        state.recognition.onerror = (e) => {
+            document.getElementById('voiceStatus').innerText = '⚠️ ' + e.error;
+        };
+    }
+}
+
+function toggleVoice() { state.isListening ? stopVoice() : startVoice(); }
+function startVoice() {
+    if (!state.recognition) initVoice();
+    if (!state.recognition) return;
+    document.getElementById('voiceResult').innerText = '';
+    document.getElementById('voiceSubmit').classList.add('hidden');
+    document.getElementById('voiceStatus').innerText = '🎧 Listening...';
+    document.getElementById('micBtn').classList.add('mic-listening', 'bg-red-700');
+    document.getElementById('micBtn').classList.remove('bg-red-500');
+    try { state.recognition.start(); state.isListening = true; } catch(e) {}
+}
+function stopVoice() {
+    if (state.recognition && state.isListening) {
+        try { state.recognition.stop(); } catch(e) {}
+        state.isListening = false;
+    }
+}
+function submitVoice() {
+    const val = document.getElementById('voiceResult').innerText.trim();
+    if (val) checkAnswer(val);
+}
+
+// ============================================================
+// ON-SCREEN KEYBOARD (shared with eye gaze)
+// ============================================================
+function buildOSK(containerId, typeFn, isGaze = false) {
+    const kb = document.getElementById(containerId);
+    kb.innerHTML = '';
+    const rows = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+    rows.forEach(row => {
+        row.split('').forEach(k => {
+            const btn = document.createElement('button');
+            btn.className = 'on-screen-key card border-2 rounded-xl hover:bg-indigo-100';
+            if (isGaze) btn.className += ' gaze-key';
+            btn.innerText = k.toUpperCase();
+            if (isGaze) btn.dataset.gaze = k;
+            else btn.onclick = () => typeFn(k);
+            kb.appendChild(btn);
+        });
+    });
+    [' ', '.', '!', '?'].forEach(k => {
+        const btn = document.createElement('button');
+        btn.className = 'on-screen-key card border-2 rounded-xl hover:bg-indigo-100';
+        if (isGaze) btn.className += ' gaze-key';
+        btn.innerText = k === ' ' ? '␣' : k;
+        if (isGaze) btn.dataset.gaze = k;
+        else btn.onclick = () => typeFn(k);
+        kb.appendChild(btn);
+    });
+}
+
+function oskType(k) {
+    state.oskValue += k;
+    document.getElementById('onscreenDisplay').innerText = state.oskValue;
+    speak(k === ' ' ? 'space' : k);
+    if (state.oskValue.length >= document.getElementById('target').innerText.length) checkAnswer(state.oskValue);
+}
+function oskAction(a) {
+    if (a === 'back') state.oskValue = state.oskValue.slice(0, -1);
+    else if (a === 'clear') state.oskValue = '';
+    else if (a === 'space') state.oskValue += ' ';
+    else if (a === 'submit') { checkAnswer(state.oskValue); return; }
+    document.getElementById('onscreenDisplay').innerText = state.oskValue;
+}
+
+// ============================================================
+// SWITCH SCANNING
+// ============================================================
+function startSwitchScan() {
+    state.switchItems = 'abcdefghijklmnopqrstuvwxyz '.split('');
+    state.switchIndex = 0;
+    highlightSwitch();
+    state.switchInterval = setInterval(() => {
+        state.switchIndex = (state.switchIndex + 1) % state.switchItems.length;
+        highlightSwitch();
+    }, 1000);
+}
+function highlightSwitch() {
+    const c = state.switchItems[state.switchIndex];
+    document.getElementById('switchRow').innerText = c === ' ' ? '␣ SPACE' : c.toUpperCase();
+    document.getElementById('switchRow').classList.add('switch-highlight');
+    speak(c === ' ' ? 'space' : c, 1.2);
+}
+function stopSwitchScan() {
+    if (state.switchInterval) clearInterval(state.switchInterval);
+    state.switchInterval = null;
+}
+function switchAction(a) {
+    if (a === 'select') {
+        state.switchValue += state.switchItems[state.switchIndex];
+        document.getElementById('switchDisplay').innerText = state.switchValue;
+        if (state.switchValue.length >= document.getElementById('target').innerText.length) {
+            stopSwitchScan(); checkAnswer(state.switchValue);
+        }
+    } else if (a === 'next') {
+        state.switchIndex = (state.switchIndex + 1) % state.switchItems.length;
+        highlightSwitch();
+    }
+}
+
+// ============================================================
+// EYE GAZE (WebGazer.js)
+// ============================================================
+let webgazerInitialized = false;
+
+function startEyeGaze() {
+    document.getElementById('gazeCursor').classList.add('active');
+    state.eyegazeActive = true;
+    if (!webgazerInitialized) {
+        webgazer.setGazeListener((data, elapsedTime) => {
+            if (!state.eyegazeActive) return;
+            if (data == null) return;
+            const cursor = document.getElementById('gazeCursor');
+            cursor.style.left = data.x + 'px';
+            cursor.style.top = data.y + 'px';
+            // Check dwell on gaze-key elements
+            checkGazeDwell(data.x, data.y);
+        }).begin();
+        webgazer.showVideoPreview(false);
+        webgazer.showPredictionPoints(false);
+        webgazerInitialized = true;
+    } else {
+        webgazer.resume();
+    }
+    // Attach gaze-key handlers
+    document.querySelectorAll('.gaze-key').forEach(btn => {
+        btn.dataset.gaze = btn.dataset.gaze || btn.innerText.trim().toLowerCase();
+    });
+}
+
+function stopEyeGaze() {
+    state.eyegazeActive = false;
+    document.getElementById('gazeCursor').classList.remove('active');
+    if (state.dwellTimeout) { clearTimeout(state.dwellTimeout); state.dwellTimeout = null; }
+    document.getElementById('gazeCursor').classList.remove('dwelling');
+    if (webgazerInitialized) { try { webgazer.pause(); } catch(e) {} }
+}
+
+function checkGazeDwell(x, y) {
+    const elements = document.elementsFromPoint(x, y);
+    const gazeEl = elements.find(el => el.dataset && el.dataset.gaze);
+    const cursor = document.getElementById('gazeCursor');
+    if (gazeEl) {
+        if (cursor.dataset.currentTarget !== gazeEl) {
+            // New target
+            cursor.dataset.currentTarget = gazeEl;
+            if (state.dwellTimeout) clearTimeout(state.dwellTimeout);
+            cursor.classList.add('dwelling');
+            state.dwellTimeout = setTimeout(() => {
+                // Dwell complete - trigger action
+                const action = gazeEl.dataset.gaze;
+                cursor.classList.remove('dwelling');
+                cursor.dataset.currentTarget = '';
+                triggerGazeAction(action);
+            }, state.dwellTime);
+        }
+    } else {
+        if (state.dwellTimeout) clearTimeout(state.dwellTimeout);
+        cursor.classList.remove('dwelling');
+        cursor.dataset.currentTarget = '';
+    }
+}
+
+function triggerGazeAction(action) {
+    if (action === 'space') eyegazeType(' ');
+    else if (action === 'back') {
+        state.eyegazeValue = state.eyegazeValue.slice(0, -1);
+        document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue;
+    }
+    else if (action === 'clear') {
+        state.eyegazeValue = '';
+        document.getElementById('eyegazeDisplay').innerText = '';
+    }
+    else if (action === 'submit') checkAnswer(state.eyegazeValue);
+    else eyegazeType(action);
+}
+
+function eyegazeType(k) {
+    state.eyegazeValue += k;
+    document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue;
+    speak(k === ' ' ? 'space' : k);
+    if (state.eyegazeValue.length >= document.getElementById('target').innerText.length) {
+        checkAnswer(state.eyegazeValue);
+    }
+}
+
+function recalibrateGaze() {
+    if (!webgazerInitialized) {
+        alert('Starting eye gaze. Please allow camera access.');
+        startEyeGaze();
+    }
+    // Simple 5-point calibration
+    const points = [
+        { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
+        { x: window.innerWidth * 0.8, y: window.innerHeight * 0.3 },
+        { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 },
+        { x: window.innerWidth * 0.2, y: window.innerHeight * 0.7 },
+        { x: window.innerWidth * 0.8, y: window.innerHeight * 0.7 }
+    ];
+    let i = 0;
+    function showNext() {
+        if (i >= points.length) {
+            document.querySelectorAll('.calib-dot').forEach(d => d.remove());
+            alert('✅ Calibration complete!');
+            return;
+        }
+        document.querySelectorAll('.calib-dot').forEach(d => d.remove());
+        const dot = document.createElement('div');
+        dot.className = 'calib-dot';
+        dot.style.left = points[i].x + 'px';
+        dot.style.top = points[i].y + 'px';
+        document.body.appendChild(dot);
+        // Train webgazer on this point
+        setTimeout(() => {
+            try {
+                webgazer.recordScreenPosition(points[i].x, points[i].y, 'click');
+            } catch(e) {}
+            i++;
+            setTimeout(showNext, 1200);
+        }, 1500);
+    }
+    showNext();
+}
+
+// ============================================================
+// HINTS
+// ============================================================
+function giveHint() {
+    const target = document.getElementById('target').innerText;
+    state.currentHintLevel++;
+    const msg = document.getElementById('msg');
+    if (state.currentHintLevel === 1) {
+        msg.innerHTML = '💡 Starts with: <b>' + target[0].toUpperCase() + '</b>';
+        msg.className = "text-center font-black text-lg text-amber-600";
+        speak('Starts with ' + target[0]);
+    } else if (state.currentHintLevel === 2) {
+        msg.innerHTML = '💡 Starts with <b>' + target[0] + '</b>, ends with <b>' + target[target.length-1] + '</b>';
+        speak('Starts with ' + target[0] + ', ends with ' + target[target.length-1]);
+    } else if (state.supportLevel === 'errorless') {
+        // Auto-fill
+        const input = document.getElementById('studentInput');
+        if (!input.classList.contains('hidden')) { input.value = target; checkAnswer(target); }
+        else if (state.inputMethod === 'onscreen') { state.oskValue = target; document.getElementById('onscreenDisplay').innerText = target; checkAnswer(target); }
+        else if (state.inputMethod === 'switch') { state.switchValue = target; document.getElementById('switchDisplay').innerText = target; stopSwitchScan(); checkAnswer(target); }
+        else if (state.inputMethod === 'eyegaze') { state.eyegazeValue = target; document.getElementById('eyegazeDisplay').innerText = target; checkAnswer(target); }
+    }
+}
+
+// ============================================================
+// ANSWER CHECKING
+// ============================================================
+function checkAnswer(val) {
+    const target = document.getElementById('target').innerText;
+    const msg = document.getElementById('msg');
+    state.sessionTrials++;
+    const correct = val.trim().toLowerCase() === target.toLowerCase();
+    if (correct) {
+        state.sessionCorrect++;
+        state.tokens++;
+        localStorage.setItem('tokens', state.tokens);
+        const input = document.getElementById('studentInput');
+        input.classList.add('input-correct');
+        msg.innerHTML = '🎉 Correct!';
+        msg.className = "text-center font-black text-2xl text-emerald-600";
+        speak('Correct! Great job!');
+        recordProgress(true);
+        updateTokenBar();
+        setTimeout(() => {
+            state.currentIndex++;
+            if (state.currentIndex < state.activeItems.length) setupGameScreen();
+            else endSession();
+        }, 2000);
+    } else {
+        const input = document.getElementById('studentInput');
+        input.classList.add('input-wrong');
+        msg.innerHTML = '🤔 Try again!';
+        msg.className = "text-center font-black text-lg text-amber-600";
+        speak('Try again.');
+        recordProgress(false);
+        setTimeout(() => {
+            input.classList.remove('input-wrong');
+            if (state.inputMethod === 'keyboard') document.getElementById('studentInput').value = '';
+            else if (state.inputMethod === 'onscreen') { state.oskValue = ''; document.getElementById('onscreenDisplay').innerText = ''; }
+            else if (state.inputMethod === 'switch') { state.switchValue = ''; document.getElementById('switchDisplay').innerText = ''; }
+            else if (state.inputMethod === 'eyegaze') { state.eyegazeValue = ''; document.getElementById('eyegazeDisplay').innerText = ''; }
+            else if (state.inputMethod === 'voice') { document.getElementById('voiceResult').innerText = ''; document.getElementById('voiceSubmit').classList.add('hidden'); }
+        }, 1500);
+    }
+}
+
+function recordProgress(correct) {
+    const data = JSON.parse(localStorage.getItem('progressData') || '[]');
+    data.push({
+        date: new Date().toISOString(),
+        studentId: state.currentStudentId || 'default',
+        mode: state.mode,
+        item: document.getElementById('target').innerText,
+        correct: correct,
+        inputMethod: state.inputMethod,
+        support: state.supportLevel
+    });
+    localStorage.setItem('progressData', JSON.stringify(data.slice(-500)));
+}
+
+// ============================================================
+// TOKENS
+// ============================================================
+function updateTokenDisplay() {
+    const d = document.getElementById('tokenDisplay');
+    d.innerHTML = '';
+    for (let i = 0; i < Math.min(state.tokens, 30); i++) {
+        const s = document.createElement('span'); s.innerText = '⭐'; d.appendChild(s);
+    }
+    if (state.tokens > 30) {
+        const more = document.createElement('span');
+        more.innerText = ` +${state.tokens - 30}`;
+        more.className = 'font-bold text-xl';
+        d.appendChild(more);
+    }
+}
+
+function updateTokenBar() {
+    ['tokenBar', 'matchTokenBar', 'buildTokenBar', 'hwTokenBar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = '';
+        for (let i = 0; i < state.activeItems.length; i++) {
+            const s = document.createElement('span');
+            s.innerText = i < state.currentIndex ? '⭐' : '☆';
+            el.appendChild(s);
+        }
+    });
+}
+
+function endSession() {
+    document.getElementById('endStars').innerText = state.sessionCorrect;
+    document.getElementById('endStats').innerText = `${state.sessionCorrect} correct of ${state.sessionTrials} attempts`;
+    const d = document.getElementById('endTokenDisplay');
+    d.innerHTML = '';
+    for (let i = 0; i < state.sessionCorrect; i++) {
+        const s = document.createElement('span');
+        s.innerText = '⭐'; s.className = 'token-earned';
+        s.style.animationDelay = (i * 0.1) + 's';
+        d.appendChild(s);
+    }
+    showScreen('endScreen');
+    speak('Amazing work! You earned ' + state.sessionCorrect + ' stars!');
+}
+
+function replaySession() { beginSession(); }
+
+// ============================================================
+// MATCHING
+// ============================================================
+function startMatching() {
+    state.matchState.items = [...wordBank].sort(() => 0.5 - Math.random()).slice(0, 5);
+    state.matchState.current = 0;
+    state.matchState.correct = 0;
+    state.activeItems = state.matchState.items;
+    state.currentIndex = 0;
+    showMatchItem();
+}
+function showMatchItem() {
+    if (state.matchState.current >= state.matchState.items.length) {
+        state.sessionCorrect = state.matchState.correct;
+        state.tokens += state.matchState.correct;
+        localStorage.setItem('tokens', state.tokens);
+        endSession(); return;
+    }
+    const item = state.matchState.items[state.matchState.current];
+    document.getElementById('matchTargetVisual').innerText = item.emoji;
+    document.getElementById('matchProgress').innerText = `Match ${state.matchState.current + 1} of ${state.matchState.items.length}`;
+    const distractors = wordBank.filter(w => w.text !== item.text).sort(() => 0.5 - Math.random()).slice(0, 3);
+    const options = [item, ...distractors].sort(() => 0.5 - Math.random());
+    const container = document.getElementById('matchOptions');
+    container.innerHTML = '';
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'p-6 card border-4 rounded-3xl text-2xl font-black hover:border-indigo-500';
+        btn.innerText = opt.text;
+        btn.onclick = () => checkMatch(opt.text === item.text, btn);
+        container.appendChild(btn);
+    });
+    speak(item.text);
+}
+function checkMatch(correct, btn) {
+    const msg = document.getElementById('matchMsg');
+    if (correct) {
+        btn.classList.add('input-correct');
+        msg.innerHTML = '🎉 Correct!';
+        msg.className = "text-center font-black text-2xl text-emerald-600";
+        speak('Correct!');
+        state.matchState.correct++;
+        setTimeout(() => { state.matchState.current++; msg.innerText = ''; showMatchItem(); }, 1500);
+    } else {
+        btn.classList.add('input-wrong');
+        msg.innerHTML = '🤔 Try again!';
+        msg.className = "text-center font-black text-lg text-amber-600";
+        speak('Try again');
+        setTimeout(() => { btn.classList.remove('input-wrong'); msg.innerText = ''; }, 1200);
+    }
+}
+function speakMatchTarget() { speak(state.matchState.items[state.matchState.current].text); }
+
+// ============================================================
+// BUILD SENTENCE
+// ============================================================
+function startBuild() {
+    const sentences = [
+        { text: "I want water.", emoji: "💧", words: ["I", "want", "water"] },
+        { text: "The cat is big.", emoji: "🐱", words: ["The", "cat", "is", "big"] },
+        { text: "I feel happy.", emoji: "😊", words: ["I", "feel", "happy"] },
+        { text: "Look at the sun.", emoji: "☀️", words: ["Look", "at", "the", "sun"] },
+        { text: "She is my friend.", emoji: "👧", words: ["She", "is", "my", "friend"] }
+    ];
+    state.buildState.items = sentences.sort(() => 0.5 - Math.random()).slice(0, 5);
+    state.buildState.current = 0;
+    state.buildState.correct = 0;
+    state.activeItems = state.buildState.items;
+    state.currentIndex = 0;
+    showBuildItem();
+}
+function showBuildItem() {
+    if (state.buildState.current >= state.buildState.items.length) {
+        state.sessionCorrect = state.buildState.correct;
+        state.tokens += state.buildState.correct;
+        localStorage.setItem('tokens', state.tokens);
+        endSession(); return;
+    }
+    const item = state.buildState.items[state.buildState.current];
+    state.buildState.answer = [];
+    document.getElementById('buildTargetVisual').innerText = item.emoji;
+    document.getElementById('buildProgress').innerText = `Sentence ${state.buildState.current + 1} of ${state.buildState.items.length}`;
+    document.getElementById('buildAnswer').innerHTML = '<span class="opacity-50">Tap words to build</span>';
+    const tiles = document.createElement('div');
+    tiles.id = 'buildTiles';
+    tiles.className = 'flex flex-wrap gap-3 justify-center';
+    [...item.words].sort(() => 0.5 - Math.random()).forEach((w, i) => {
+        const t = document.createElement('button');
+        t.className = 'px-6 py-4 card border-4 border-indigo-300 rounded-2xl text-xl font-black hover:scale-105';
+        t.innerText = w;
+        t.dataset.word = w;
+        t.onclick = () => buildAdd(t);
+        tiles.appendChild(t);
+    });
+    const container = document.getElementById('buildTiles');
+    container.replaceWith(tiles);
+    speak(item.text);
+}
+function buildAdd(tile) {
+    if (tile.classList.contains('used')) return;
+    state.buildState.answer.push(tile.dataset.word);
+    tile.classList.add('used');
+    renderBuildAnswer();
+    speak(tile.dataset.word);
+}
+function renderBuildAnswer() {
+    const c = document.getElementById('buildAnswer');
+    c.innerHTML = '';
+    if (!state.buildState.answer.length) {
+        c.innerHTML = '<span class="opacity-50">Tap words to build</span>'; return;
+    }
+    state.buildState.answer.forEach(w => {
+        const s = document.createElement('span');
+        s.className = 'px-3 py-1 bg-indigo-100 rounded-xl';
+        s.innerText = w;
+        c.appendChild(s);
+    });
+}
+function buildUndo() {
+    if (!state.buildState.answer.length) return;
+    const w = state.buildState.answer.pop();
+    document.querySelectorAll('#buildTiles button').forEach(t => {
+        if (t.dataset.word === w && t.classList.contains('used')) t.classList.remove('used');
+    });
+    renderBuildAnswer();
+}
+function buildClear() {
+    state.buildState.answer = [];
+    document.querySelectorAll('#buildTiles button').forEach(t => t.classList.remove('used'));
+    renderBuildAnswer();
+}
+function buildCheck() {
+    const item = state.buildState.items[state.buildState.current];
+    const msg = document.getElementById('buildMsg');
+    if (state.buildState.answer.join(' ') === item.words.join(' ')) {
+        msg.innerHTML = '🎉 Perfect!';
+        msg.className = "text-center font-black text-2xl text-emerald-600";
+        speak('Perfect!');
+        state.buildState.correct++;
+        setTimeout(() => { state.buildState.current++; msg.innerText = ''; showBuildItem(); }, 2000);
+    } else {
+        msg.innerHTML = '🤔 Try again!';
+        msg.className = "text-center font-black text-lg text-amber-600";
+        speak('Try again.');
+        setTimeout(() => { msg.innerText = ''; }, 1500);
+    }
+}
+function speakBuildTarget() { speak(state.buildState.items[state.buildState.current].text); }
+
+// ============================================================
+// HANDWRITING
+// ============================================================
+let hwCanvas, hwCtx;
+
+function startHandwriting() {
+    state.hwItems = [...handwritingBank].sort(() => 0.5 - Math.random()).slice(0, state.itemCount);
+    state.hwIndex = 0;
+    state.sessionCorrect = 0;
+    state.activeItems = state.hwItems.map(l => ({ text: l, emoji: '✍️' }));
+    state.currentIndex = 0;
+    hwCanvas = document.getElementById('handwritingCanvas');
+    hwCtx = hwCanvas.getContext('2d');
+    setupCanvas();
+    showHWItem();
+}
+
+function setupCanvas() {
+    hwCtx.strokeStyle = '#6366f1';
+    hwCtx.lineWidth = 8;
+    hwCtx.lineCap = 'round';
+    hwCtx.lineJoin = 'round';
+    
+    // Mouse events
+    hwCanvas.onmousedown = (e) => hwStart(e.offsetX, e.offsetY);
+    hwCanvas.onmousemove = (e) => { if (state.hwDrawing) hwMove(e.offsetX, e.offsetY); };
+    hwCanvas.onmouseup = hwEnd;
+    hwCanvas.onmouseleave = hwEnd;
+    
+    // Touch events
+    hwCanvas.ontouchstart = (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        const rect = hwCanvas.getBoundingClientRect();
+        const scaleX = hwCanvas.width / rect.width;
+        const scaleY = hwCanvas.height / rect.height;
+        hwStart((t.clientX - rect.left) * scaleX, (t.clientY - rect.top) * scaleY);
+    };
+    hwCanvas.ontouchmove = (e) => {
+        e.preventDefault();
+        if (!state.hwDrawing) return;
+        const t = e.touches[0];
+        const rect = hwCanvas.getBoundingClientRect();
+        const scaleX = hwCanvas.width / rect.width;
+        const scaleY = hwCanvas.height / rect.height;
+        hwMove((t.clientX - rect.left) * scaleX, (t.clientY - rect.top) * scaleY);
+    };
+    hwCanvas.ontouchend = hwEnd;
+}
+
+function hwStart(x, y) {
+    state.hwDrawing = true;
+    state.hwLastPoint = { x, y };
+    state.hwStrokes.push([{ x, y }]);
+}
+
+function hwMove(x, y) {
+    if (!state.hwDrawing) return;
+    hwCtx.beginPath();
+    hwCtx.moveTo(state.hwLastPoint.x, state.hwLastPoint.y);
+    hwCtx.lineTo(x, y);
+    hwCtx.stroke();
+    state.hwStrokes[state.hwStrokes.length - 1].push({ x, y });
+    state.hwLastPoint = { x, y };
+}
+
+function hwEnd() { state.hwDrawing = false; }
+
+function showHWItem() {
+    if (state.hwIndex >= state.hwItems.length) {
+        state.tokens += state.sessionCorrect;
+        localStorage.setItem('tokens', state.tokens);
+        endSession(); return;
+    }
+    const letter = state.hwItems[state.hwIndex];
+    document.getElementById('hwTarget').innerText = letter;
+    document.getElementById('letterGuide').innerText = letter;
+    document.getElementById('hwProgress').innerText = `Letter ${state.hwIndex + 1} of ${state.hwItems.length}`;
+    document.getElementById('hwTargetVisual').innerText = '✍️';
+    hwClear();
+    updateTokenBar();
+    speak(letter);
+    // Tips based on letter
+    const tips = {
+        'A': "Start at the top. Go down-left, then down-right. Cross in the middle.",
+        'B': "Start at top. Go down. Back to top, make two bumps.",
+        'O': "Start at top. Go around in a circle. Close it at the top.",
+        'S': "Start at top. Curve right, then left, then right again."
+    };
+    document.getElementById('hwTips').innerText = tips[letter] || "Follow the dotted letter carefully.";
+}
+
+function hwClear() {
+    hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height);
+    state.hwStrokes = [];
+    document.getElementById('hwMsg').innerText = '';
+}
+
+function hwUndo() {
+    if (!state.hwStrokes.length) return;
+    state.hwStrokes.pop();
+    // Redraw all strokes
+    hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height);
+    state.hwStrokes.forEach(stroke => {
+        if (stroke.length < 2) return;
+        hwCtx.beginPath();
+        hwCtx.moveTo(stroke[0].x, stroke[0].y);
+        for (let i = 1; i < stroke.length; i++) hwCtx.lineTo(stroke[i].x, stroke[i].y);
+        hwCtx.stroke();
+    });
+}
+
+function hwShowGuide() {
+    const guide = document.getElementById('letterGuide');
+    guide.style.color = guide.style.color === 'rgba(99, 102, 241, 0.5)' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(99, 102, 241, 0.5)';
+}
+
+function hwCheck() {
+    const msg = document.getElementById('hwMsg');
+    // Simple validation: check if student drew something (has enough strokes)
+    const totalPoints = state.hwStrokes.reduce((sum, s) => sum + s.length, 0);
+    const strokeCount = state.hwStrokes.length;
+    
+    // Calculate coverage: what % of canvas was touched
+    const canvasArea = hwCanvas.width * hwCanvas.height;
+    const coverage = Math.min(100, (totalPoints * 20 / canvasArea) * 100);
+    
+    if (strokeCount === 0 || totalPoints < 20) {
+        msg.innerHTML = '✏️ Draw the letter first!';
+        msg.className = "text-center font-black text-lg text-amber-600";
+        speak('Draw the letter first.');
+        return;
+    }
+    
+    // For CP/dysgraphia: be very encouraging. Any reasonable attempt is success.
+    // Criteria: at least 2 strokes OR 50+ points (shows effort)
+    const success = strokeCount >= 1 && totalPoints >= 30;
+    
+    if (success) {
+        state.sessionCorrect++;
+        msg.innerHTML = '🎉 Great tracing! ⭐';
+        msg.className = "text-center font-black text-2xl text-emerald-600";
+        speak('Great job! Beautiful letter!');
+        setTimeout(() => {
+            state.hwIndex++;
+            state.currentIndex = state.hwIndex;
+            showHWItem();
+        }, 2000);
+    } else {
+        msg.innerHTML = '💪 Keep trying! Make bigger strokes.';
+        msg.className = "text-center font-black text-lg text-amber-600";
+        speak('Keep trying. Make bigger strokes.');
+    }
+}
+
+function hwSkip() {
+    state.hwIndex++;
+    state.currentIndex = state.hwIndex;
+    showHWItem();
+}
+
+function speakHWTarget() { speak(state.hwItems[state.hwIndex]); }
+
+// ============================================================
+// SOCIAL STORIES
+// ============================================================
+function startStories() {
+    state.storyIndex = 0;
+    showStoryList();
+}
+
+function showStoryList() {
+    const content = document.getElementById('storyContent');
+    content.innerHTML = `
+        <h2 class="text-3xl font-black mb-4">📚 Choose a Story</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${socialStories.map((s, i) => `
+                <button onclick="openStory(${i})" class="p-4 card border-4 border-pink-300 rounded-2xl text-left hover:scale-105 transition-all">
+                    <div class="font-black text-lg">${state.lang === 'es' ? s.titleEs : s.title}</div>
+                    <div class="text-sm opacity-70">${s.pages.length} pages</div>
+                </button>
+            `).join('')}
+        </div>
+    `;
+    document.getElementById('storyProgress').innerText = 'Story Selection';
+}
+
+function openStory(i) {
+    state.storyIndex = i;
+    state.storyPage = 0;
+    state.currentStory = socialStories[i];
+    showStoryPage();
+}
+
+function showStoryPage() {
+    const story = state.currentStory;
+    const page = story.pages[state.storyPage];
+    const text = state.lang === 'es' ? page.textEs : page.text;
+    const content = document.getElementById('storyContent');
+    content.innerHTML = `
+        <div class="story-page space-y-4">
+            <div class="text-9xl">${page.emoji}</div>
+            <p class="text-2xl font-bold leading-relaxed">${text}</p>
+            <div class="text-sm opacity-60">Page ${state.storyPage + 1} of ${story.pages.length}</div>
+        </div>
+    `;
+    document.getElementById('storyProgress').innerText = `${state.lang === 'es' ? story.titleEs : story.title}`;
+    speak(text);
+}
+
+function storyNext() {
+    if (state.storyPage < state.currentStory.pages.length - 1) {
+        state.storyPage++;
+        showStoryPage();
+    } else {
+        // Story complete
+        state.tokens += 2;
+        localStorage.setItem('tokens', state.tokens);
+        const content = document.getElementById('storyContent');
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div class="text-8xl">🎉</div>
+                <h2 class="text-3xl font-black text-emerald-600">Story Complete!</h2>
+                <p class="text-xl">You earned 2 stars for reading!</p>
+                <button onclick="showStoryList()" class="px-6 py-3 btn-primary rounded-2xl font-bold">📚 More Stories</button>
+            </div>
+        `;
+        speak('Story complete! You earned 2 stars!');
+    }
+}
+
+function storyPrev() {
+    if (state.storyPage > 0) { state.storyPage--; showStoryPage(); }
+    else showStoryList();
+}
+
+function storySpeak() {
+    const page = state.currentStory.pages[state.storyPage];
+    speak(state.lang === 'es' ? page.textEs : page.text);
+}
+
+// ============================================================
+// FONT SIZE
+// ============================================================
+function changeFontSize(id, delta) {
+    const el = document.getElementById(id);
+    const style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+    el.style.fontSize = (parseFloat(style) + delta) + 'px';
+}
+
+// ============================================================
+// TEACHER DASHBOARD
+// ============================================================
+function teacherLogin() {
+    const pin = document.getElementById('teacherPin').value;
+    const savedPin = localStorage.getItem('teacherPin') || '1234';
+    if (pin === savedPin) {
+        state.teacherLoggedIn = true;
+        document.getElementById('teacherPin').value = '';
+        showScreen('teacherDashboard');
+    } else {
+        alert('❌ Incorrect PIN');
+    }
+}
+
+function teacherLogout() {
+    state.teacherLoggedIn = false;
+    showScreen('homeScreen');
+}
+
+function getStudents() {
+    return JSON.parse(localStorage.getItem('students') || '[]');
+}
+
+function saveStudents(students) {
+    localStorage.setItem('students', JSON.stringify(students));
+}
+
+function renderTeacherDashboard() {
+    const students = getStudents();
+    const data = JSON.parse(localStorage.getItem('progressData') || '[]');
+    
+    document.getElementById('statStudents').innerText = students.length;
+    document.getElementById('statSessions').innerText = data.length;
+    const correct = data.filter(d => d.correct).length;
+    document.getElementById('statAccuracy').innerText = data.length ? Math.round((correct / data.length) * 100) + '%' : '0%';
+    
+    const list = document.getElementById('studentList');
+    if (!students.length) {
+        list.innerHTML = '<div class="card rounded-3xl border-2 p-8 text-center opacity-70">No students yet. Click "Add Student" to begin.</div>';
+        return;
+    }
+    list.innerHTML = students.map(s => {
+        const sData = data.filter(d => d.studentId === s.id);
+        const sCorrect = sData.filter(d => d.correct).length;
+        const acc = sData.length ? Math.round((sCorrect / sData.length) * 100) : 0;
+        return `
+            <div onclick="openStudent('${s.id}')" class="student-row card rounded-2xl border-2 p-4 cursor-pointer flex justify-between items-center hover:border-indigo-400">
+                <div>
+                    <div class="font-black text-lg">👤 ${s.name}</div>
+                    <div class="text-sm opacity-70">Grade ${s.grade} • ${sData.length} trials • ${acc}% accuracy</div>
+                </div>
+                <div class="text-2xl">⭐ ${s.stars || 0}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addStudent() {
+    const name = prompt('Student name:');
+    if (!name) return;
+    const grade = prompt('Grade (JK-12):') || '3';
+    const goals = prompt('IEP Goals (short description):') || '';
+    const input = prompt('Primary input method (keyboard/voice/switch/eyegaze):') || 'keyboard';
+    const students = getStudents();
+    const id = 's_' + Date.now();
+    students.push({ id, name, grade, goals, input, stars: 0, createdAt: new Date().toISOString() });
+    saveStudents(students);
+    renderTeacherDashboard();
+}
+
+function openStudent(id) {
+    state.currentStudentId = id;
+    const students = getStudents();
+    const s = students.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('studentName').innerText = s.name;
+    document.getElementById('studentGoals').innerText = s.goals || '—';
+    document.getElementById('studentGrade').innerText = s.grade;
+    document.getElementById('studentInput').innerText = s.input;
+    document.getElementById('studentStars').innerText = s.stars || 0;
+    
+    const data = JSON.parse(localStorage.getItem('progressData') || '[]').filter(d => d.studentId === id);
+    const prog = document.getElementById('studentProgress');
+    if (!data.length) {
+        prog.innerHTML = '<div class="opacity-70">No data yet. Start a session with this student selected.</div>';
+    } else {
+        prog.innerHTML = data.slice(-30).reverse().map(d => `
+            <div class="flex justify-between items-center p-2 card border rounded-xl text-sm">
+                <span>${new Date(d.date).toLocaleString()}</span>
+                <span class="font-bold">${d.mode}</span>
+                <span>${d.item}</span>
+                <span>${d.correct ? '✅' : '❌'}</span>
+            </div>
+        `).join('');
+    }
+    
+    // AI Insights
+    const insights = document.getElementById('studentInsights');
+    if (data.length < 5) {
+        insights.innerHTML = '<div class="opacity-70">Need more data for insights (at least 5 trials).</div>';
+    } else {
+        const recent = data.slice(-20);
+        const acc = Math.round((recent.filter(d => d.correct).length / recent.length) * 100);
+        const modeCounts = {};
+        recent.forEach(d => modeCounts[d.mode] = (modeCounts[d.mode] || 0) + 1);
+        const topMode = Object.entries(modeCounts).sort((a,b) => b[1]-a[1])[0][0];
+        const strugglingItems = data.filter(d => !d.correct).slice(-5).map(d => d.item);
+        
+        let html = `
+            <div class="p-3 card border-2 rounded-xl">📊 <b>Overall accuracy:</b> ${acc}%</div>
+            <div class="p-3 card border-2 rounded-xl">🎯 <b>Most practiced:</b> ${topMode}</div>
+        `;
+        if (acc < 50) html += `<div class="p-3 card border-2 border-amber-300 rounded-xl">⚠️ <b>Recommendation:</b> Lower difficulty. Try errorless learning mode.</div>`;
+        else if (acc > 85) html += `<div class="p-3 card border-2 border-emerald-300 rounded-xl">🚀 <b>Recommendation:</b> Ready for harder material. Increase challenge.</div>`;
+        if (strugglingItems.length) {
+            html += `<div class="p-3 card border-2 rounded-xl">📝 <b>Items to review:</b> ${strugglingItems.join(', ')}</div>`;
+        }
+        insights.innerHTML = html;
+    }
+    
+    showScreen('studentDetail');
+}
+
+// ============================================================
+// PDF REPORT (jsPDF)
+// ============================================================
+function generateReport() {
+    const students = getStudents();
+    const s = students.find(x => x.id === state.currentStudentId);
+    if (!s) return;
+    const data = JSON.parse(localStorage.getItem('progressData') || '[]').filter(d => d.studentId === s.id);
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFillColor(99, 102, 241);
+    doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.text('Inclusive Literacy Hub', 15, 15);
+    doc.setFontSize(12);
+    doc.text('Student Progress Report', 15, 23);
+    
+    doc.setTextColor(0, 0, 0);
+    let y = 45;
+    
+    // Student info
+    doc.setFontSize(14);
+    doc.text('Student Information', 15, y); y += 8;
+    doc.setFontSize(11);
+    doc.text(`Name: ${s.name}`, 15, y); y += 6;
+    doc.text(`Grade: ${s.grade}`, 15, y); y += 6;
+    doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 15, y); y += 6;
+    doc.text(`Total Stars Earned: ${s.stars || 0}`, 15, y); y += 6;
+    if (s.goals) {
+        doc.text(`IEP Goals: ${s.goals}`, 15, y); y += 6;
+    }
+    y += 5;
+    
+    // Summary stats
+    doc.setFontSize(14);
+    doc.text('Performance Summary', 15, y); y += 8;
+    doc.setFontSize(11);
+    const total = data.length;
+    const correct = data.filter(d => d.correct).length;
+    const acc = total ? Math.round((correct / total) * 100) : 0;
+    doc.text(`Total Trials: ${total}`, 15, y); y += 6;
+    doc.text(`Correct: ${correct}`, 15, y); y += 6;
+    doc.text(`Accuracy: ${acc}%`, 15, y); y += 6;
+    
+    // By mode
+    const byMode = {};
+    data.forEach(d => {
+        if (!byMode[d.mode]) byMode[d.mode] = { total: 0, correct: 0 };
+        byMode[d.mode].total++;
+        if (d.correct) byMode[d.mode].correct++;
+    });
+    y += 3;
+    doc.setFontSize(12);
+    doc.text('By Activity:', 15, y); y += 6;
+    doc.setFontSize(10);
+    Object.entries(byMode).forEach(([mode, stats]) => {
+        const mAcc = Math.round((stats.correct / stats.total) * 100);
+        doc.text(`  • ${mode}: ${stats.correct}/${stats.total} (${mAcc}%)`, 15, y); y += 5;
+    });
+    
+    y += 5;
+    // Recent progress table
+    doc.setFontSize(14);
+    doc.text('Recent Trials (Last 20)', 15, y); y += 8;
+    doc.setFontSize(9);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y - 4, 180, 6, 'F');
+    doc.text('Date', 15, y);
+    doc.text('Mode', 55, y);
+    doc.text('Item', 90, y);
+    doc.text('Result', 160, y);
+    y += 6;
+    
+    data.slice(-20).reverse().forEach(d => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        const date = new Date(d.date).toLocaleDateString();
+        doc.text(date.substring(0, 10), 15, y);
+        doc.text(d.mode, 55, y);
+        const itemText = (d.item || '').substring(0, 30);
+        doc.text(itemText, 90, y);
+        doc.text(d.correct ? 'CORRECT' : 'INCORRECT', 160, y);
+        y += 5;
+    });
+    
+    // AI Insights
+    y += 5;
+    if (y > 240) { doc.addPage(); y = 20; }
+    doc.setFontSize(14);
+    doc.text('Recommendations', 15, y); y += 8;
+    doc.setFontSize(11);
+    if (total < 10) {
+        doc.text('• Collect more data (at least 20 trials) for detailed insights.', 15, y); y += 6;
+    } else {
+        if (acc < 50) {
+            doc.text('• Student is struggling. Consider:', 15, y); y += 6;
+            doc.text('  - Switching to errorless learning mode', 20, y); y += 5;
+            doc.text('  - Reducing item difficulty (shorter words/sentences)', 20, y); y += 5;
+            doc.text('  - Adding more visual supports', 20, y); y += 5;
+        } else if (acc > 85) {
+            doc.text('• Student is excelling. Consider:', 15, y); y += 6;
+            doc.text('  - Increasing difficulty level', 20, y); y += 5;
+            doc.text('  - Introducing new vocabulary', 20, y); y += 5;
+            doc.text('  - Moving to more complex activities', 20, y); y += 5;
+        } else {
+            doc.text('• Student is making steady progress. Continue current approach.', 15, y); y += 6;
+        }
+    }
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Generated by Inclusive Literacy Hub • Page ${i} of ${pageCount}`, 15, 290);
+    }
+    
+    doc.save(`${s.name.replace(/\s+/g, '_')}_Progress_Report_${new Date().toISOString().substring(0,10)}.pdf`);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(function init() {
+    state.theme = localStorage.getItem('theme') || 'default';
+    if (state.theme !== 'default') document.body.setAttribute('data-theme', state.theme);
+    state.speechRate = parseFloat(localStorage.getItem('speechRate') || '0.9');
+    state.itemCount = parseInt(localStorage.getItem('itemCount') || '5');
+    state.lang = localStorage.getItem('lang') || 'en';
+    state.adaptiveEnabled = localStorage.getItem('adaptive') === 'true';
+    state.dwellTime = parseInt(localStorage.getItem('dwellTime') || '1200');
+    document.getElementById('langSelect').value = state.lang;
+    changeLanguage(state.lang);
+    updateTokenDisplay();
+    updateAdaptiveInsight();
+})();
+</script>
+</body>
+</html>
