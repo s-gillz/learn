@@ -832,7 +832,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 speak(newChar.toLowerCase());
                 state.lastSpokenChar = newChar;
             } else if (newChar === ' ') {
-                speak('space');
             }
         }
         
@@ -936,7 +935,9 @@ function oskType(k) {
     if (k !== ' ' && !isPunctuation(k)) {
         speak(k.toLowerCase());
     } else if (k === ' ') {
-        speak('space');
+ const words = state.oskValue.trim().split(/\s+/);
+    const lastWord = words[words.length - 1];
+    speakCompletedWord(lastWord);
     }
     
     // Check if complete
@@ -981,7 +982,7 @@ function switchAction(a) {
         // Speak the character
         const c = state.switchItems[state.switchIndex];
         if (c !== ' ') speak(c.toLowerCase());
-        else speak('space');
+        
         
         // Check if complete
         const targetText = document.getElementById('target').innerText;
@@ -1055,7 +1056,7 @@ function eyegazeType(k) {
     if (k !== ' ' && !isPunctuation(k)) {
         speak(k.toLowerCase());
     } else if (k === ' ') {
-        speak('space');
+       
     }
     
     // Check if complete
