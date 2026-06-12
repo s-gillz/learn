@@ -816,6 +816,7 @@ function setupInputMethod() {
 // ============================================================
 // INPUT HANDLING WITH LETTER-BY-LETTER FEEDBACK
 // ============================================================
+// REPLACE THIS ENTIRE SECTION (around line 575-610)
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('studentInput');
     
@@ -825,10 +826,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Handle letter-by-letter speech
         if (currentVal.length > state.previousInput.length) {
-            // Character was added
             const newChar = currentVal[currentVal.length - 1];
             
-            // Speak the character (skip spaces and punctuation for individual speech)
             if (newChar && newChar !== ' ' && !isPunctuation(newChar)) {
                 speak(newChar.toLowerCase());
                 state.lastSpokenChar = newChar;
@@ -837,12 +836,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Check if word/sentence is complete
+        // Remove punctuation for comparison
         const currentClean = removePunctuation(currentVal.trim().toLowerCase());
         const targetClean = removePunctuation(targetText.trim().toLowerCase());
         
+        // Check if word/sentence is complete (punctuation-insensitive)
         if (currentClean === targetClean && currentVal.length > 0) {
-            // Word/sentence complete - speak the full thing after a short delay
             setTimeout(() => {
                 speak(targetText);
             }, 300);
@@ -850,8 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         state.previousInput = currentVal;
         
-        // Check for answer completion
-        if (currentVal.length >= targetText.length) {
+        // FIXED: Check completion based on clean length, not raw length
+        if (currentClean.length >= targetClean.length && currentClean.length > 0) {
             checkAnswer(currentVal);
         }
     });
