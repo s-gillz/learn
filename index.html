@@ -62,10 +62,7 @@
             animation: calibPulse 1s infinite;
         }
         @keyframes calibPulse { 0%,100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } }
-        .adaptive-badge {
-            display: inline-block; padding: 2px 10px; border-radius: 999px;
-            font-size: 0.75rem; font-weight: bold;
-        }
+        .adaptive-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: bold; }
         .level-easy { background: #dbeafe; color: #1e40af; }
         .level-medium { background: #fef3c7; color: #92400e; }
         .level-hard { background: #fee2e2; color: #991b1b; }
@@ -100,9 +97,9 @@
         <h1 class="text-2xl font-black">🌟 Inclusive Literacy Hub</h1>
         <div class="flex gap-2 flex-wrap">
             <select id="langSelect" onchange="changeLanguage(this.value)" class="p-2 rounded-xl card border-2 font-bold">
-                <option value="en">🇬 EN</option><option value="es">🇪 ES</option>
-                <option value="fr">🇫🇷 FR</option><option value="ar">🇸 AR</option>
-                <option value="zh">🇨🇳 ZH</option><option value="pa">🇮🇳 PA</option>
+                <option value="en">🇧 EN</option><option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫 FR</option><option value="ar">🇦 AR</option>
+                <option value="zh">🇨🇳 ZH</option><option value="pa">🇮 PA</option>
             </select>
             <button onclick="toggleMute()" id="muteBtn" class="p-2 rounded-xl card border-2 text-xl">🔊</button>
             <button onclick="cycleTheme()" class="p-2 rounded-xl card border-2 text-xl">🎨</button>
@@ -147,7 +144,7 @@
                     <button onclick="setInputMethod('keyboard')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1 border-indigo-500 bg-indigo-100" id="btn-keyboard"><div class="text-3xl">⌨️</div><div class="font-bold text-sm">Keyboard</div></button>
                     <button onclick="setInputMethod('voice')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1" id="btn-voice"><div class="text-3xl">🎤</div><div class="font-bold text-sm">Voice</div></button>
                     <button onclick="setInputMethod('onscreen')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1" id="btn-onscreen"><div class="text-3xl">🖱️</div><div class="font-bold text-sm">Click</div></button>
-                    <button onclick="setInputMethod('switch')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1" id="btn-switch"><div class="text-3xl">🔘</div><div class="font-bold text-sm">Switch</div></button>
+                    <button onclick="setInputMethod('switch')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1" id="btn-switch"><div class="text-3xl"></div><div class="font-bold text-sm">Switch</div></button>
                     <button onclick="setInputMethod('eyegaze')" class="input-method-btn p-4 rounded-2xl border-2 card space-y-1" id="btn-eyegaze"><div class="text-3xl">👁️</div><div class="font-bold text-sm">Eye Gaze</div></button>
                 </div>
             </div>
@@ -166,7 +163,6 @@
                     <button onclick="setVisuals(false)" class="visual-btn p-4 rounded-2xl border-2 card"><div class="text-2xl">❌</div><div class="font-bold">Text only</div></button>
                 </div>
             </div>
-            <!-- CASE SELECTOR -->
             <div id="caseSelector" class="card rounded-3xl border-2 p-6 space-y-3">
                 <h3 class="font-bold text-lg">🔠 Letter Style</h3>
                 <div class="case-selector">
@@ -181,7 +177,6 @@
 
         <!-- GAME SCREEN -->
         <div id="gameScreen" class="screen space-y-4">
-            <!-- Progress Bar -->
             <div class="card rounded-3xl border-2 p-4">
                 <div class="flex justify-between items-center mb-2">
                     <span id="progress" class="font-black">Item 1 of 5</span>
@@ -192,56 +187,38 @@
                     <div id="progressBar" class="progress-fill bg-indigo-500 h-3 rounded-full" style="width:0%"></div>
                 </div>
             </div>
-
-            <!-- Font Size Controls -->
             <div class="flex justify-center gap-4 text-sm font-bold">
-                <div>Target: 
-                    <button onclick="changeFontSize('target', 4)" class="px-3 py-1 card border rounded">A+</button>
-                    <button onclick="changeFontSize('target', -4)" class="px-3 py-1 card border rounded ml-1">A-</button>
-                </div>
-                <div>Input: 
-                    <button onclick="changeFontSize('studentInput', 4)" class="px-3 py-1 card border rounded">A+</button>
-                    <button onclick="changeFontSize('studentInput', -4)" class="px-3 py-1 card border rounded ml-1">A-</button>
-                </div>
+                <div>Target: <button onclick="changeFontSize('target', 4)" class="px-3 py-1 card border rounded">A+</button><button onclick="changeFontSize('target', -4)" class="px-3 py-1 card border rounded ml-1">A-</button></div>
+                <div>Input: <button onclick="changeFontSize('studentInput', 4)" class="px-3 py-1 card border rounded">A+</button><button onclick="changeFontSize('studentInput', -4)" class="px-3 py-1 card border rounded ml-1">A-</button></div>
             </div>
-
-            <!-- TARGET CARD -->
             <div id="targetCard" class="card border-4 rounded-3xl p-6 text-center shadow-sm">
-                <!-- Buttons at the TOP -->
                 <div class="flex justify-center gap-2 mb-4 flex-wrap">
                     <button onclick="speakCurrent()" class="action-btn btn-hear">🔊 Hear It</button>
                     <button onclick="speakSlow()" class="action-btn btn-slow">🐢 Slow</button>
                     <button onclick="soundOut()" class="action-btn btn-sound">🔤 Sound It</button>
                     <button id="hintBtn" onclick="giveHint()" class="action-btn btn-hint hidden">💡 Hint</button>
                 </div>
-                <!-- Visual/Emoji -->
                 <div id="targetVisual" class="text-7xl mb-3 hidden"></div>
-                <!-- Large target text -->
                 <div id="target" class="font-black text-5xl leading-tight"></div>
             </div>
-
-            <!-- INPUT AREA -->
             <div id="inputArea">
                 <input type="text" id="studentInput" class="w-full font-bold py-6 px-8 rounded-3xl border-4 text-center text-3xl outline-none card" placeholder="Type here..." autocomplete="off">
-                
                 <div id="voiceInput" class="hidden text-center space-y-3">
-                    <button onclick="toggleVoice()" id="micBtn" class="w-32 h-32 rounded-full bg-red-500 text-white text-5xl shadow-xl mx-auto flex items-center justify-center">🎤</button>
+                    <button onclick="toggleVoice()" id="micBtn" class="w-32 h-32 rounded-full bg-red-500 text-white text-5xl shadow-xl mx-auto flex items-center justify-center"></button>
                     <div id="voiceStatus" class="font-bold text-lg">Tap microphone, then speak</div>
                     <div id="voiceResult" class="text-2xl font-black min-h-[3rem]"></div>
                     <button onclick="submitVoice()" class="px-8 py-3 btn-primary font-bold text-xl rounded-2xl hidden" id="voiceSubmit">✓ That's what I said</button>
                 </div>
-
                 <div id="onscreenInput" class="hidden space-y-3">
                     <div id="onscreenDisplay" class="w-full font-bold py-4 px-6 rounded-3xl border-4 text-center text-3xl card min-h-[5rem]"></div>
                     <div id="onscreenKeyboard" class="grid grid-cols-10 gap-1 sm:gap-2"></div>
                     <div class="flex gap-2 justify-center flex-wrap">
-                        <button onclick="oskAction('space')" class="px-6 py-3 card border-2 rounded-xl font-bold">␣</button>
+                        <button onclick="oskAction('space')" class="px-6 py-3 card border-2 rounded-xl font-bold"></button>
                         <button onclick="oskAction('back')" class="px-6 py-3 card border-2 rounded-xl font-bold">⌫</button>
                         <button onclick="oskAction('clear')" class="px-6 py-3 card border-2 rounded-xl font-bold">🗑️</button>
                         <button onclick="oskAction('submit')" class="px-6 py-3 btn-primary rounded-xl font-bold">✓</button>
                     </div>
                 </div>
-
                 <div id="switchInput" class="hidden space-y-3">
                     <div id="switchDisplay" class="w-full font-bold py-4 px-6 rounded-3xl border-4 text-center text-3xl card min-h-[5rem]"></div>
                     <div id="switchRow" class="text-center text-4xl font-black p-8 card border-4 rounded-3xl min-h-[8rem] flex items-center justify-center">Press SELECT</div>
@@ -250,7 +227,6 @@
                         <button onclick="switchAction('next')" class="py-8 bg-slate-500 text-white font-black text-2xl rounded-3xl shadow-lg">▶ NEXT</button>
                     </div>
                 </div>
-
                 <div id="eyegazeInput" class="hidden space-y-3">
                     <div id="eyegazeStatus" class="text-center font-bold text-lg p-4 card rounded-2xl border-2">👁️ Look at the letters. Hold your gaze to select.</div>
                     <div id="eyegazeDisplay" class="w-full font-bold py-4 px-6 rounded-3xl border-4 text-center text-3xl card min-h-[5rem]"></div>
@@ -264,7 +240,6 @@
                     <button onclick="recalibrateGaze()" class="mx-auto block px-4 py-2 bg-amber-100 rounded-xl font-bold text-amber-700">🎯 Recalibrate</button>
                 </div>
             </div>
-
             <div id="msg" class="text-center font-black text-lg min-h-[2rem]"></div>
         </div>
 
@@ -292,7 +267,7 @@
                 </div>
             </div>
             <div class="flex justify-center gap-2 flex-wrap">
-                <button onclick="hwUndo()" class="px-6 py-3 card border-2 rounded-xl font-bold">↶ Undo</button>
+                <button onclick="hwUndo()" class="px-6 py-3 card border-2 rounded-xl font-bold"> Undo</button>
                 <button onclick="hwClear()" class="px-6 py-3 card border-2 rounded-xl font-bold">🗑️ Clear</button>
                 <button onclick="hwShowGuide()" class="px-6 py-3 bg-amber-100 rounded-xl font-bold">👁️ Show Guide</button>
                 <button onclick="hwCheck()" class="px-8 py-3 btn-primary font-bold rounded-xl">✓ Check</button>
@@ -311,8 +286,8 @@
             </div>
             <div id="storyContent" class="card border-4 rounded-3xl p-8 text-center space-y-4 min-h-[400px]"></div>
             <div class="flex justify-center gap-3">
-                <button onclick="storyPrev()" class="px-6 py-3 card border-2 rounded-xl font-bold">⬅️ Back</button>
-                <button onclick="storySpeak()" class="px-6 py-3 bg-indigo-100 rounded-xl font-bold">🔊 Read Aloud</button>
+                <button onclick="storyPrev()" class="px-6 py-3 card border-2 rounded-xl font-bold">️ Back</button>
+                <button onclick="storySpeak()" class="px-6 py-3 bg-indigo-100 rounded-xl font-bold"> Read Aloud</button>
                 <button onclick="storyNext()" class="px-6 py-3 btn-primary rounded-xl font-bold">Next ➡️</button>
             </div>
         </div>
@@ -328,7 +303,7 @@
             <h3 class="text-2xl font-black text-center">Match the picture to the word!</h3>
             <div id="matchTarget" class="card border-4 rounded-3xl p-8 text-center">
                 <div id="matchTargetVisual" class="text-8xl mb-4"></div>
-                <button onclick="speakMatchTarget()" class="px-4 py-2 bg-indigo-100 rounded-xl font-bold">🔊</button>
+                <button onclick="speakMatchTarget()" class="px-4 py-2 bg-indigo-100 rounded-xl font-bold"></button>
             </div>
             <div id="matchOptions" class="grid grid-cols-2 gap-4"></div>
             <div id="matchMsg" class="text-center font-black text-lg min-h-[2rem]"></div>
@@ -356,10 +331,10 @@
 
         <!-- END -->
         <div id="endScreen" class="screen text-center space-y-6">
-            <div class="text-8xl">🎉</div>
+            <div class="text-8xl"></div>
             <h2 class="text-5xl font-black text-emerald-600">Amazing Work!</h2>
             <div class="card rounded-3xl border-2 p-6 max-w-md mx-auto space-y-3">
-                <div class="text-2xl font-bold">You earned <span id="endStars" class="text-amber-500">0</span> ⭐</div>
+                <div class="text-2xl font-bold">You earned <span id="endStars" class="text-amber-500">0</span> </div>
                 <div id="endTokenDisplay" class="flex justify-center gap-1 flex-wrap text-4xl"></div>
                 <div id="endStats" class="text-lg opacity-70"></div>
             </div>
@@ -371,7 +346,7 @@
 
         <!-- SETTINGS -->
         <div id="settingsScreen" class="screen space-y-4">
-            <h2 class="text-3xl font-black text-center">⚙️ Settings</h2>
+            <h2 class="text-3xl font-black text-center">️ Settings</h2>
             <div class="card rounded-3xl border-2 p-6 space-y-3">
                 <h3 class="font-bold text-lg">🔊 Speech Speed</h3>
                 <input type="range" id="speechRate" min="0.5" max="1.5" step="0.1" value="0.9" onchange="updateSpeechRate()" class="w-full">
@@ -392,7 +367,7 @@
                 <div id="adaptiveInfo" class="text-sm opacity-70"></div>
             </div>
             <div class="card rounded-3xl border-2 p-6 space-y-3">
-                <h3 class="font-bold text-lg">👁️ Eye Gaze Settings</h3>
+                <h3 class="font-bold text-lg">️ Eye Gaze Settings</h3>
                 <button onclick="recalibrateGaze()" class="w-full py-3 bg-indigo-100 font-bold rounded-2xl">🎯 Calibrate Eye Gaze</button>
                 <div><label class="font-bold text-sm">Dwell Time: <span id="dwellLabel">1.2s</span></label><input type="range" id="dwellTime" min="0.5" max="3" step="0.1" value="1.2" onchange="updateDwell()" class="w-full"></div>
             </div>
@@ -405,7 +380,7 @@
 
         <!-- TEACHER LOGIN -->
         <div id="teacherLogin" class="screen space-y-6 max-w-md mx-auto text-center">
-            <h2 class="text-3xl font-black">👩‍ Teacher Portal</h2>
+            <h2 class="text-3xl font-black">👩‍🏫 Teacher Portal</h2>
             <div class="card rounded-3xl border-2 p-6 space-y-4">
                 <p class="text-sm opacity-70">Enter teacher PIN (default: 1234)</p>
                 <input type="password" id="teacherPin" maxlength="6" class="w-full p-4 text-center text-3xl font-black card border-4 rounded-2xl tracking-widest" placeholder="••••">
@@ -417,7 +392,7 @@
         <!-- TEACHER DASHBOARD -->
         <div id="teacherDashboard" class="screen space-y-4">
             <div class="flex justify-between items-center flex-wrap gap-2">
-                <h2 class="text-3xl font-black">👩‍ Dashboard</h2>
+                <h2 class="text-3xl font-black">👩‍🏫 Dashboard</h2>
                 <div class="flex gap-2">
                     <button onclick="addStudent()" class="px-4 py-2 btn-primary rounded-xl font-bold">➕ Add Student</button>
                     <button onclick="teacherLogout()" class="px-4 py-2 bg-slate-200 rounded-xl font-bold">🚪</button>
@@ -439,7 +414,7 @@
                 <h2 class="text-3xl font-black">👤 <span id="studentName">Student</span></h2>
                 <div class="flex gap-2">
                     <button onclick="generateReport()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold">📄 Generate PDF Report</button>
-                    <button onclick="showScreen('teacherDashboard')" class="px-4 py-2 bg-slate-200 rounded-xl font-bold">⬅️</button>
+                    <button onclick="showScreen('teacherDashboard')" class="px-4 py-2 bg-slate-200 rounded-xl font-bold">️</button>
                 </div>
             </div>
             <div class="card rounded-3xl border-2 p-6 space-y-3">
@@ -470,22 +445,22 @@ const sentenceBank = [
     { text: "Can I have water?", emoji: "💧" }, { text: "I need a break.", emoji: "🧘" }
 ];
 const wordBank = [
-    { text: "the", emoji: "👉" }, { text: "and", emoji: "➕" }, { text: "a", emoji: "1️⃣" },
+    { text: "the", emoji: "👉" }, { text: "and", emoji: "➕" }, { text: "a", emoji: "1️" },
     { text: "to", emoji: "➡️" }, { text: "is", emoji: "✅" }, { text: "you", emoji: "🫵" },
-    { text: "cat", emoji: "🐱" }, { text: "dog", emoji: "🐶" }, { text: "sun", emoji: "☀️" },
+    { text: "cat", emoji: "🐱" }, { text: "dog", emoji: "" }, { text: "sun", emoji: "☀️" },
     { text: "run", emoji: "🏃" }, { text: "hat", emoji: "🎩" }, { text: "cup", emoji: "☕" },
-    { text: "red", emoji: "🔴" }, { text: "big", emoji: "🐘" }, { text: "mom", emoji: "👩" }, { text: "dad", emoji: "👨" }
+    { text: "red", emoji: "" }, { text: "big", emoji: "🐘" }, { text: "mom", emoji: "👩" }, { text: "dad", emoji: "👨" }
 ];
 const phonicsBank = [
-    { text: "a", emoji: "🍎" }, { text: "b", emoji: "🐻" }, { text: "c", emoji: "🐱" },
+    { text: "a", emoji: "🍎" }, { text: "b", emoji: "🐻" }, { text: "c", emoji: "" },
     { text: "d", emoji: "🐶" }, { text: "m", emoji: "🐵" }, { text: "s", emoji: "🐍" },
-    { text: "t", emoji: "🐯" }, { text: "p", emoji: "🐷" }
+    { text: "t", emoji: "" }, { text: "p", emoji: "🐷" }
 ];
 const handwritingBank = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','1','2','3'];
 const socialStories = [
     { title: "🧼 Washing My Hands", pages: [
-        { emoji: "🧼", text: "I wash my hands to keep my body healthy." },
-        { emoji: "🚰", text: "I turn on the water. The water feels wet." },
+        { emoji: "", text: "I wash my hands to keep my body healthy." },
+        { emoji: "", text: "I turn on the water. The water feels wet." },
         { emoji: "🧴", text: "I push the soap. One push is enough." },
         { emoji: "👐", text: "I rub my hands together. I count to 20." },
         { emoji: "🚰", text: "I rinse the soap off with water." },
@@ -497,15 +472,15 @@ const socialStories = [
         { emoji: "🤔", text: "Sometimes I know the answer. That feels good!" },
         { emoji: "✋", text: "I raise my hand quietly. I wait." },
         { emoji: "👀", text: "The teacher may call on me. Or someone else. Both are okay." },
-        { emoji: "🗣️", text: "When it is my turn, I share my answer." },
+        { emoji: "️", text: "When it is my turn, I share my answer." },
         { emoji: "👏", text: "Raising my hand helps everyone learn." }
     ]},
     { title: "🛒 Waiting My Turn", pages: [
         { emoji: "⏳", text: "Sometimes I have to wait. Waiting can feel hard." },
         { emoji: "😤", text: "When I wait, I might feel frustrated. That is okay." },
         { emoji: "🧘", text: "I can take a deep breath. In... and out." },
-        { emoji: "👀", text: "I watch to see whose turn is next." },
-        { emoji: "⏰", text: "Soon, it will be my turn." },
+        { emoji: "", text: "I watch to see whose turn is next." },
+        { emoji: "", text: "Soon, it will be my turn." },
         { emoji: "🎉", text: "Waiting shows I am patient. I am proud of myself!" }
     ]},
     { title: "🔊 When It's Too Loud", pages: [
@@ -514,14 +489,14 @@ const socialStories = [
         { emoji: "🙋", text: "I can tell a grown-up: 'It is too loud.'" },
         { emoji: "🎧", text: "I can use my noise-reducing headphones." },
         { emoji: "🚪", text: "I can ask for a quiet break." },
-        { emoji: "🧘", text: "Taking care of my body is smart and okay." }
+        { emoji: "", text: "Taking care of my body is smart and okay." }
     ]},
     { title: "👋 Saying Hello", pages: [
         { emoji: "👋", text: "When I see someone I know, I can say hello." },
         { emoji: "😊", text: "I can smile. Smiling shows I am friendly." },
         { emoji: "🗣️", text: "I can say 'Hi!' or 'Hello!'" },
         { emoji: "🖐️", text: "Some people like to wave. Some like to high-five." },
-        { emoji: "❓", text: "I can watch what the other person does and follow their lead." },
+        { emoji: "", text: "I can watch what the other person does and follow their lead." },
         { emoji: "💚", text: "Saying hello makes new friends possible!" }
     ]}
 ];
@@ -548,7 +523,18 @@ let state = {
 };
 
 // ============================================================
-// SCREEN MANAGEMENT
+// HELPER FUNCTIONS
+// ============================================================
+function isPunctuation(char) { return /[.,\/#!$%\^&\*;:{}=\-_`~()?!'""]/.test(char); }
+function removePunctuation(text) { return text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?!'""]+/g, "").trim(); }
+
+function speakCompletedWord(text) {
+    const cleanWord = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?!'""]+$/, '');
+    if (cleanWord) setTimeout(() => speak(cleanWord), 200);
+}
+
+// ============================================================
+// SCREEN MANAGEMENT & PREFERENCES
 // ============================================================
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -560,223 +546,64 @@ function showScreen(id) {
     if (id === 'settingsScreen') loadSettingsUI();
     if (id === 'teacherDashboard') renderTeacherDashboard();
 }
+function toggleMute() { state.muted = !state.muted; document.getElementById('muteBtn').innerText = state.muted ? '🔇' : '🔊'; if (state.muted) window.speechSynthesis.cancel(); }
+function cycleTheme() { const themes = ['default', 'calm', 'dark', 'highcontrast']; state.theme = themes[(themes.indexOf(state.theme) + 1) % themes.length]; document.body.setAttribute('data-theme', state.theme === 'default' ? '' : state.theme); localStorage.setItem('theme', state.theme); }
+function updateSpeechRate() { state.speechRate = parseFloat(document.getElementById('speechRate').value); document.getElementById('speechRateLabel').innerText = state.speechRate + 'x'; localStorage.setItem('speechRate', state.speechRate); }
+function setItemCount(n) { state.itemCount = n; localStorage.setItem('itemCount', n); document.querySelectorAll('.item-count-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100')); if (event && event.target) event.target.classList.add('border-indigo-500', 'bg-indigo-100'); }
+function saveCustomList() { localStorage.setItem('customList', document.getElementById('customList').value); alert('✅ Saved!'); }
+function loadSettingsUI() { document.getElementById('speechRate').value = state.speechRate; document.getElementById('speechRateLabel').innerText = state.speechRate + 'x'; document.getElementById('customList').value = localStorage.getItem('customList') || ''; document.getElementById('adaptiveToggle').checked = state.adaptiveEnabled; document.getElementById('dwellTime').value = state.dwellTime / 1000; document.getElementById('dwellLabel').innerText = (state.dwellTime / 1000) + 's'; updateAdaptiveInfo(); }
+function toggleAdaptive() { state.adaptiveEnabled = document.getElementById('adaptiveToggle').checked; localStorage.setItem('adaptive', state.adaptiveEnabled); updateAdaptiveInfo(); }
+function updateDwell() { state.dwellTime = parseFloat(document.getElementById('dwellTime').value) * 1000; document.getElementById('dwellLabel').innerText = (state.dwellTime / 1000) + 's'; localStorage.setItem('dwellTime', state.dwellTime); }
+function updateAdaptiveInfo() { const el = document.getElementById('adaptiveInfo'); if (!el) return; if (state.adaptiveEnabled) { const stats = getAdaptiveStats(); el.innerHTML = `✅ Enabled. Recent accuracy: <b>${stats.accuracy}%</b> → Level: <b>${stats.level}</b>`; } else { el.innerHTML = '⏸️ Disabled. Difficulty stays fixed.'; } }
 
 // ============================================================
-// PREFERENCES
+// AI ADAPTIVE & SPEECH
 // ============================================================
-function toggleMute() {
-    state.muted = !state.muted;
-    document.getElementById('muteBtn').innerText = state.muted ? '🔇' : '🔊';
-    if (state.muted) window.speechSynthesis.cancel();
-}
-function cycleTheme() {
-    const themes = ['default', 'calm', 'dark', 'highcontrast'];
-    state.theme = themes[(themes.indexOf(state.theme) + 1) % themes.length];
-    document.body.setAttribute('data-theme', state.theme === 'default' ? '' : state.theme);
-    localStorage.setItem('theme', state.theme);
-}
-function updateSpeechRate() {
-    state.speechRate = parseFloat(document.getElementById('speechRate').value);
-    document.getElementById('speechRateLabel').innerText = state.speechRate + 'x';
-    localStorage.setItem('speechRate', state.speechRate);
-}
-function setItemCount(n) {
-    state.itemCount = n;
-    localStorage.setItem('itemCount', n);
-    document.querySelectorAll('.item-count-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
-    if (event && event.target) event.target.classList.add('border-indigo-500', 'bg-indigo-100');
-}
-function saveCustomList() {
-    localStorage.setItem('customList', document.getElementById('customList').value);
-    alert('✅ Saved!');
-}
-function loadSettingsUI() {
-    document.getElementById('speechRate').value = state.speechRate;
-    document.getElementById('speechRateLabel').innerText = state.speechRate + 'x';
-    document.getElementById('customList').value = localStorage.getItem('customList') || '';
-    document.getElementById('adaptiveToggle').checked = state.adaptiveEnabled;
-    document.getElementById('dwellTime').value = state.dwellTime / 1000;
-    document.getElementById('dwellLabel').innerText = (state.dwellTime / 1000) + 's';
-    updateAdaptiveInfo();
-}
-function toggleAdaptive() {
-    state.adaptiveEnabled = document.getElementById('adaptiveToggle').checked;
-    localStorage.setItem('adaptive', state.adaptiveEnabled);
-    updateAdaptiveInfo();
-}
-function updateDwell() {
-    state.dwellTime = parseFloat(document.getElementById('dwellTime').value) * 1000;
-    document.getElementById('dwellLabel').innerText = (state.dwellTime / 1000) + 's';
-    localStorage.setItem('dwellTime', state.dwellTime);
-}
-function updateAdaptiveInfo() {
-    const el = document.getElementById('adaptiveInfo');
-    if (!el) return;
-    if (state.adaptiveEnabled) {
-        const stats = getAdaptiveStats();
-        el.innerHTML = `✅ Enabled. Recent accuracy: <b>${stats.accuracy}%</b> → Level: <b>${stats.level}</b>`;
-    } else {
-        el.innerHTML = '⏸️ Disabled. Difficulty stays fixed.';
-    }
-}
+function getAdaptiveStats() { const data = JSON.parse(localStorage.getItem('progressData') || '[]'); const recent = data.slice(-20); if (!recent.length) return { accuracy: 0, level: 'medium', difficulty: 1 }; const correct = recent.filter(d => d.correct).length; const accuracy = Math.round((correct / recent.length) * 100); let level = 'medium', difficulty = 1; if (accuracy < 50) { level = 'easy'; difficulty = 0.5; } else if (accuracy > 80) { level = 'hard'; difficulty = 1.5; } return { accuracy, level, difficulty }; }
+function updateAdaptiveInsight() { if (!state.adaptiveEnabled) { document.getElementById('adaptiveInsight').classList.add('hidden'); return; } const stats = getAdaptiveStats(); document.getElementById('adaptiveInsight').classList.remove('hidden'); let msg = stats.accuracy === 0 ? "Let's start learning! I'll adjust as we go." : stats.accuracy < 50 ? `🌱 You're finding things tricky. I'll make it easier with more hints. Accuracy: ${stats.accuracy}%` : stats.accuracy > 80 ? `🚀 You're doing great! I'll challenge you more. Accuracy: ${stats.accuracy}%` : `👍 Steady progress! Accuracy: ${stats.accuracy}%. Keep going!`; document.getElementById('adaptiveText').innerText = msg; }
+function applyAdaptiveSettings() { if (!state.adaptiveEnabled) return; const stats = getAdaptiveStats(); if (stats.accuracy < 50 && state.supportLevel === 'independent') state.supportLevel = 'hints'; else if (stats.accuracy > 85 && state.supportLevel === 'errorless') state.supportLevel = 'hints'; const badge = document.getElementById('levelBadge'); if (badge) badge.innerHTML = `<span class="adaptive-badge level-${stats.level}">${stats.level.toUpperCase()} • ${stats.accuracy}%</span>`; }
+
+function speak(text, rate = null) { if (state.muted || !text) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = rate || state.speechRate; const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN', pa: 'pa-IN' }; u.lang = langMap[state.lang] || 'en-US'; window.speechSynthesis.speak(u); }
+function speakCurrent() { const t = document.getElementById('target').innerText; if (t) speak(t); }
+function speakSlow() { const t = document.getElementById('target').innerText; if (t) speak(t, 0.5); }
+function soundOut() { const t = document.getElementById('target').innerText; if (!t) return; const words = t.split(' '); let delay = 0; words.forEach((w, i) => { setTimeout(() => speak(w, 0.6), delay); delay += 1200; }); }
 
 // ============================================================
-// AI ADAPTIVE
+// MODE SELECTION & SESSION
 // ============================================================
-function getAdaptiveStats() {
-    const data = JSON.parse(localStorage.getItem('progressData') || '[]');
-    const recent = data.slice(-20);
-    if (!recent.length) return { accuracy: 0, level: 'medium', difficulty: 1 };
-    const correct = recent.filter(d => d.correct).length;
-    const accuracy = Math.round((correct / recent.length) * 100);
-    let level = 'medium', difficulty = 1;
-    if (accuracy < 50) { level = 'easy'; difficulty = 0.5; }
-    else if (accuracy > 80) { level = 'hard'; difficulty = 1.5; }
-    return { accuracy, level, difficulty };
-}
-function updateAdaptiveInsight() {
-    if (!state.adaptiveEnabled) { document.getElementById('adaptiveInsight').classList.add('hidden'); return; }
-    const stats = getAdaptiveStats();
-    document.getElementById('adaptiveInsight').classList.remove('hidden');
-    let msg = stats.accuracy === 0 ? "Let's start learning! I'll adjust as we go." :
-              stats.accuracy < 50 ? `🌱 You're finding things tricky. I'll make it easier with more hints. Accuracy: ${stats.accuracy}%` :
-              stats.accuracy > 80 ? `🚀 You're doing great! I'll challenge you more. Accuracy: ${stats.accuracy}%` :
-              `👍 Steady progress! Accuracy: ${stats.accuracy}%. Keep going!`;
-    document.getElementById('adaptiveText').innerText = msg;
-}
-function applyAdaptiveSettings() {
-    if (!state.adaptiveEnabled) return;
-    const stats = getAdaptiveStats();
-    if (stats.accuracy < 50 && state.supportLevel === 'independent') state.supportLevel = 'hints';
-    else if (stats.accuracy > 85 && state.supportLevel === 'errorless') state.supportLevel = 'hints';
-    const badge = document.getElementById('levelBadge');
-    if (badge) badge.innerHTML = `<span class="adaptive-badge level-${stats.level}">${stats.level.toUpperCase()} • ${stats.accuracy}%</span>`;
-}
+function startMode(m) { state.mode = m; if (m === 'matching') { showScreen('matchingScreen'); startMatching(); return; } if (m === 'build') { showScreen('buildScreen'); startBuild(); return; } if (m === 'handwriting') { showScreen('handwritingScreen'); startHandwriting(); return; } if (m === 'stories') { showScreen('storiesScreen'); startStories(); return; } document.getElementById('setupTitle').innerText = { sentences: '📖 Sentences', words: '🔤 Sight Words', phonics: '🔊 Phonics', custom: '⭐ My Words' }[m] || 'Setup'; showScreen('setupScreen'); }
+function setInputMethod(m) { state.inputMethod = m; document.querySelectorAll('.input-method-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100')); const btn = document.getElementById(`btn-${m}`); if (btn) btn.classList.add('border-indigo-500', 'bg-indigo-100'); }
+function setSupport(s) { state.supportLevel = s; document.querySelectorAll('.support-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100')); if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100'); }
+function setVisuals(v) { state.showVisuals = v; document.querySelectorAll('.visual-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100')); if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100'); }
+function setCase(c) { state.wordCase = c; document.querySelectorAll('.case-btn').forEach(b => b.classList.remove('active')); const btn = document.getElementById(`case-${c}`); if (btn) btn.classList.add('active'); }
 
-// ============================================================
-// SPEECH
-// ============================================================
-function speak(text, rate = null) {
-    if (state.muted || !text) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = rate || state.speechRate;
-    const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN', pa: 'pa-IN' };
-    u.lang = langMap[state.lang] || 'en-US';
-    window.speechSynthesis.speak(u);
-}
-
-function speakCurrent() {
-    const t = document.getElementById('target').innerText;
-    if (t) speak(t);
-}
-
-function speakSlow() {
-    const t = document.getElementById('target').innerText;
-    if (t) speak(t, 0.5);
-}
-
-function soundOut() {
-    const t = document.getElementById('target').innerText;
-    if (!t) return;
-    const words = t.split(' ');
-    let delay = 0;
-    words.forEach((w, i) => {
-        setTimeout(() => speak(w, 0.6), delay);
-        delay += 1200;
-    });
-}
-
-// ============================================================
-// MODE SELECTION
-// ============================================================
-function startMode(m) {
-    state.mode = m;
-    if (m === 'matching') { showScreen('matchingScreen'); startMatching(); return; }
-    if (m === 'build') { showScreen('buildScreen'); startBuild(); return; }
-    if (m === 'handwriting') { showScreen('handwritingScreen'); startHandwriting(); return; }
-    if (m === 'stories') { showScreen('storiesScreen'); startStories(); return; }
-    document.getElementById('setupTitle').innerText = { sentences: '📖 Sentences', words: '🔤 Sight Words', phonics: '🔊 Phonics', custom: '⭐ My Words' }[m] || 'Setup';
-    showScreen('setupScreen');
-}
-function setInputMethod(m) {
-    state.inputMethod = m;
-    document.querySelectorAll('.input-method-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
-    const btn = document.getElementById(`btn-${m}`);
-    if (btn) btn.classList.add('border-indigo-500', 'bg-indigo-100');
-}
-function setSupport(s) {
-    state.supportLevel = s;
-    document.querySelectorAll('.support-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
-    if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100');
-}
-function setVisuals(v) {
-    state.showVisuals = v;
-    document.querySelectorAll('.visual-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-100'));
-    if (event && event.currentTarget) event.currentTarget.classList.add('border-indigo-500', 'bg-indigo-100');
-}
-function setCase(c) {
-    state.wordCase = c;
-    document.querySelectorAll('.case-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById(`case-${c}`);
-    if (btn) btn.classList.add('active');
-}
-
-// ============================================================
-// SESSION
-// ============================================================
 function beginSession() {
     let source;
-    if (state.mode === 'custom') {
-        const raw = (localStorage.getItem('customList') || '').split('\n').map(s => s.trim()).filter(Boolean);
-        if (!raw.length) { alert('Add words in Settings first!'); return; }
-        source = raw.map(t => ({ text: t, emoji: '⭐' }));
-    } else if (state.mode === 'sentences') source = sentenceBank;
+    if (state.mode === 'custom') { const raw = (localStorage.getItem('customList') || '').split('\n').map(s => s.trim()).filter(Boolean); if (!raw.length) { alert('Add words in Settings first!'); return; } source = raw.map(t => ({ text: t, emoji: '⭐' })); } 
+    else if (state.mode === 'sentences') source = sentenceBank;
     else if (state.mode === 'phonics') source = phonicsBank;
     else source = wordBank;
-
-    if (state.adaptiveEnabled) {
-        const stats = getAdaptiveStats();
-        if (stats.level === 'easy') source = [...source].sort((a, b) => a.text.length - b.text.length);
-        else if (stats.level === 'hard') source = [...source].sort((a, b) => b.text.length - a.text.length);
-    }
-
+    if (state.adaptiveEnabled) { const stats = getAdaptiveStats(); if (stats.level === 'easy') source = [...source].sort((a, b) => a.text.length - b.text.length); else if (stats.level === 'hard') source = [...source].sort((a, b) => b.text.length - a.text.length); }
     state.activeItems = [...source].sort(() => 0.5 - Math.random()).slice(0, state.itemCount);
-    state.currentIndex = 0; state.sessionCorrect = 0; state.sessionTrials = 0;
-    state.previousInput = ''; state.lastSpokenChar = '';
-    showScreen('gameScreen');
-    applyAdaptiveSettings();
-    setupGameScreen();
+    state.currentIndex = 0; state.sessionCorrect = 0; state.sessionTrials = 0; state.previousInput = ''; state.lastSpokenChar = '';
+    showScreen('gameScreen'); applyAdaptiveSettings(); setupGameScreen();
 }
 
 function setupGameScreen() {
     const item = state.activeItems[state.currentIndex];
     let display = item.text;
-    
-    if (state.wordCase === 'upper') {
-        display = display.toUpperCase();
-    } else if (state.wordCase === 'sentence') {
-        display = display.charAt(0).toUpperCase() + display.slice(1).toLowerCase();
-    } else {
-        display = display.toLowerCase();
-    }
-    
+    if (state.wordCase === 'upper') display = display.toUpperCase();
+    else if (state.wordCase === 'sentence') display = display.charAt(0).toUpperCase() + display.slice(1).toLowerCase();
+    else display = display.toLowerCase();
     document.getElementById('target').innerText = display;
     const vis = document.getElementById('targetVisual');
-    if (state.showVisuals && item.emoji) { vis.innerText = item.emoji; vis.classList.remove('hidden'); }
-    else vis.classList.add('hidden');
-
+    if (state.showVisuals && item.emoji) { vis.innerText = item.emoji; vis.classList.remove('hidden'); } else vis.classList.add('hidden');
     document.getElementById('hintBtn').classList.toggle('hidden', state.supportLevel === 'independent');
     state.currentHintLevel = 0;
     document.getElementById('progress').innerText = `Item ${state.currentIndex + 1} of ${state.activeItems.length}`;
     document.getElementById('progressBar').style.width = ((state.currentIndex) / state.activeItems.length * 100) + '%';
-    updateTokenBar();
-    setupInputMethod();
-    
-    const input = document.getElementById('studentInput');
-    input.value = '';
-    state.previousInput = '';
-    state.lastSpokenChar = '';
+    updateTokenBar(); setupInputMethod();
+    const input = document.getElementById('studentInput'); input.value = ''; state.previousInput = ''; state.lastSpokenChar = '';
     if (state.inputMethod === 'keyboard') input.classList.remove('hidden');
     document.getElementById('msg').innerText = '';
     setTimeout(() => speak(display), 300);
@@ -785,343 +612,141 @@ function setupGameScreen() {
 function setupInputMethod() {
     const inputs = ['studentInput', 'voiceInput', 'onscreenInput', 'switchInput', 'eyegazeInput'];
     inputs.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
-
-    if (!state.inputMethod || !['keyboard', 'voice', 'onscreen', 'switch', 'eyegaze'].includes(state.inputMethod)) {
-        state.inputMethod = 'keyboard';
-    }
-
-    if (state.inputMethod === 'keyboard') {
-        const input = document.getElementById('studentInput');
-        input.classList.remove('hidden');
-        setTimeout(() => input.focus(), 100);
-    } else if (state.inputMethod === 'voice') {
-        document.getElementById('voiceInput').classList.remove('hidden');
-        initVoice();
-    } else if (state.inputMethod === 'onscreen') {
-        document.getElementById('onscreenInput').classList.remove('hidden');
-        buildOSK('onscreenKeyboard', oskType);
-        state.oskValue = ''; document.getElementById('onscreenDisplay').innerText = '';
-    } else if (state.inputMethod === 'switch') {
-        document.getElementById('switchInput').classList.remove('hidden');
-        state.switchValue = ''; document.getElementById('switchDisplay').innerText = '';
-        startSwitchScan();
-    } else if (state.inputMethod === 'eyegaze') {
-        document.getElementById('eyegazeInput').classList.remove('hidden');
-        buildOSK('eyegazeKeyboard', eyegazeType, true);
-        state.eyegazeValue = ''; document.getElementById('eyegazeDisplay').innerText = '';
-        startEyeGaze();
-    }
+    if (!state.inputMethod || !['keyboard', 'voice', 'onscreen', 'switch', 'eyegaze'].includes(state.inputMethod)) state.inputMethod = 'keyboard';
+    if (state.inputMethod === 'keyboard') { const input = document.getElementById('studentInput'); input.classList.remove('hidden'); setTimeout(() => input.focus(), 100); } 
+    else if (state.inputMethod === 'voice') { document.getElementById('voiceInput').classList.remove('hidden'); initVoice(); } 
+    else if (state.inputMethod === 'onscreen') { document.getElementById('onscreenInput').classList.remove('hidden'); buildOSK('onscreenKeyboard', oskType); state.oskValue = ''; document.getElementById('onscreenDisplay').innerText = ''; } 
+    else if (state.inputMethod === 'switch') { document.getElementById('switchInput').classList.remove('hidden'); state.switchValue = ''; document.getElementById('switchDisplay').innerText = ''; startSwitchScan(); } 
+    else if (state.inputMethod === 'eyegaze') { document.getElementById('eyegazeInput').classList.remove('hidden'); buildOSK('eyegazeKeyboard', eyegazeType, true); state.eyegazeValue = ''; document.getElementById('eyegazeDisplay').innerText = ''; startEyeGaze(); }
 }
 
 // ============================================================
-// INPUT HANDLING WITH LETTER-BY-LETTER FEEDBACK
+// INPUT HANDLING (KEYBOARD) - NO SPACE SPEECH
 // ============================================================
-// REPLACE THIS ENTIRE SECTION (around line 575-610)
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('studentInput');
-    
+    let checkTimeout = null;
     input.addEventListener('input', (e) => {
         const currentVal = e.target.value;
         const targetText = document.getElementById('target').innerText;
+        if (checkTimeout) { clearTimeout(checkTimeout); checkTimeout = null; }
         
-        // Handle letter-by-letter speech
         if (currentVal.length > state.previousInput.length) {
             const newChar = currentVal[currentVal.length - 1];
-            
             if (newChar && newChar !== ' ' && !isPunctuation(newChar)) {
                 speak(newChar.toLowerCase());
                 state.lastSpokenChar = newChar;
-            } else if (newChar === ' ') {
             }
+            // NO speak('space') here
         }
         
-        // Remove punctuation for comparison
+        // Speak completed word on space
+        if (currentVal.length > state.previousInput.length && currentVal[currentVal.length - 1] === ' ') {
+            const words = currentVal.trim().split(/\s+/);
+            const lastWord = words[words.length - 1];
+            speakCompletedWord(lastWord);
+        }
+        
         const currentClean = removePunctuation(currentVal.trim().toLowerCase());
         const targetClean = removePunctuation(targetText.trim().toLowerCase());
-        
-        // Check if word/sentence is complete (punctuation-insensitive)
-        if (currentClean === targetClean && currentVal.length > 0) {
-            setTimeout(() => {
-                speak(targetText);
-            }, 300);
-        }
-        
         state.previousInput = currentVal;
         
-        // FIXED: Check completion based on clean length, not raw length
         if (currentClean.length >= targetClean.length && currentClean.length > 0) {
-            checkAnswer(currentVal);
+            checkTimeout = setTimeout(() => {
+                speak(targetText);
+                setTimeout(() => checkAnswer(currentVal), 2000);
+            }, 500);
         }
     });
 });
 
-// Helper function to check if character is punctuation
-function isPunctuation(char) {
-    return /[.,\/#!$%\^&\*;:{}=\-_`~()?!'""]/.test(char);
-}
-
-// Helper function to remove punctuation from text
-function removePunctuation(text) {
-    return text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?!'""]+/g, "").trim();
-}
-
 // ============================================================
-// VOICE INPUT
+// VOICE, OSK, SWITCH, EYE GAZE
 // ============================================================
-function initVoice() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { document.getElementById('voiceStatus').innerText = '⚠️ Voice not supported. Try Chrome.'; return; }
-    if (!state.recognition) {
-        state.recognition = new SR();
-        state.recognition.continuous = false; state.recognition.interimResults = true;
-        const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN', pa: 'pa-IN' };
-        state.recognition.lang = langMap[state.lang] || 'en-US';
-        state.recognition.onresult = (e) => {
-            const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-            document.getElementById('voiceResult').innerText = transcript;
-            document.getElementById('voiceSubmit').classList.remove('hidden');
-        };
-        state.recognition.onend = () => {
-            state.isListening = false;
-            document.getElementById('micBtn').classList.remove('mic-listening', 'bg-red-700');
-            document.getElementById('micBtn').classList.add('bg-red-500');
-        };
-        state.recognition.onerror = (e) => { document.getElementById('voiceStatus').innerText = '⚠️ ' + e.error; };
-    }
-}
+function initVoice() { const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) { document.getElementById('voiceStatus').innerText = '⚠️ Voice not supported. Try Chrome.'; return; } if (!state.recognition) { state.recognition = new SR(); state.recognition.continuous = false; state.recognition.interimResults = true; const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN', pa: 'pa-IN' }; state.recognition.lang = langMap[state.lang] || 'en-US'; state.recognition.onresult = (e) => { document.getElementById('voiceResult').innerText = Array.from(e.results).map(r => r[0].transcript).join(''); document.getElementById('voiceSubmit').classList.remove('hidden'); }; state.recognition.onend = () => { state.isListening = false; document.getElementById('micBtn').classList.remove('mic-listening', 'bg-red-700'); document.getElementById('micBtn').classList.add('bg-red-500'); }; state.recognition.onerror = (e) => { document.getElementById('voiceStatus').innerText = '⚠️ ' + e.error; }; } }
 function toggleVoice() { state.isListening ? stopVoice() : startVoice(); }
-function startVoice() {
-    if (!state.recognition) initVoice();
-    if (!state.recognition) return;
-    document.getElementById('voiceResult').innerText = '';
-    document.getElementById('voiceSubmit').classList.add('hidden');
-    document.getElementById('voiceStatus').innerText = '🎧 Listening...';
-    document.getElementById('micBtn').classList.add('mic-listening', 'bg-red-700');
-    document.getElementById('micBtn').classList.remove('bg-red-500');
-    try { state.recognition.start(); state.isListening = true; } catch(e) {}
-}
-function stopVoice() {
-    if (state.recognition && state.isListening) { try { state.recognition.stop(); } catch(e) {} state.isListening = false; }
-}
+function startVoice() { if (!state.recognition) initVoice(); if (!state.recognition) return; document.getElementById('voiceResult').innerText = ''; document.getElementById('voiceSubmit').classList.add('hidden'); document.getElementById('voiceStatus').innerText = '🎧 Listening...'; document.getElementById('micBtn').classList.add('mic-listening', 'bg-red-700'); document.getElementById('micBtn').classList.remove('bg-red-500'); try { state.recognition.start(); state.isListening = true; } catch(e) {} }
+function stopVoice() { if (state.recognition && state.isListening) { try { state.recognition.stop(); } catch(e) {} state.isListening = false; } }
 function submitVoice() { const val = document.getElementById('voiceResult').innerText.trim(); if (val) checkAnswer(val); }
 
-// ============================================================
-// ON-SCREEN KEYBOARD
-// ============================================================
-function buildOSK(containerId, typeFn, isGaze = false) {
-    const kb = document.getElementById(containerId); kb.innerHTML = '';
-    ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'].forEach(row => {
-        row.split('').forEach(k => {
-            const btn = document.createElement('button');
-            btn.className = 'on-screen-key card border-2 rounded-xl hover:bg-indigo-100' + (isGaze ? ' gaze-key' : '');
-            btn.innerText = k.toUpperCase();
-            if (isGaze) btn.dataset.gaze = k; else btn.onclick = () => typeFn(k);
-            kb.appendChild(btn);
-        });
-    });
-    [' ', '.', '!', '?'].forEach(k => {
-        const btn = document.createElement('button');
-        btn.className = 'on-screen-key card border-2 rounded-xl hover:bg-indigo-100' + (isGaze ? ' gaze-key' : '');
-        btn.innerText = k === ' ' ? '␣' : k;
-        if (isGaze) btn.dataset.gaze = k; else btn.onclick = () => typeFn(k);
-        kb.appendChild(btn);
-    });
-}
+function buildOSK(containerId, typeFn, isGaze = false) { const kb = document.getElementById(containerId); kb.innerHTML = ''; ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'].forEach(row => { row.split('').forEach(k => { const btn = document.createElement('button'); btn.className = 'on-screen-key card border-2 rounded-xl hover:bg-indigo-100' + (isGaze ? ' gaze-key' : ''); btn.innerText = k.toUpperCase(); if (isGaze) btn.dataset.gaze = k; else btn.onclick = () => typeFn(k); kb.appendChild(btn); }); }); [' ', '.', '!', '?'].forEach(k => { const btn = document.createElement('button'); btn.className = 'on-screen-key card border-2 rounded-xl hover:bg-indigo-100' + (isGaze ? ' gaze-key' : ''); btn.innerText = k === ' ' ? '␣' : k; if (isGaze) btn.dataset.gaze = k; else btn.onclick = () => typeFn(k); kb.appendChild(btn); }); }
+
 function oskType(k) {
-    state.oskValue += k; 
-    document.getElementById('onscreenDisplay').innerText = state.oskValue;
-    
-    // Speak the character
-    if (k !== ' ' && !isPunctuation(k)) {
-        speak(k.toLowerCase());
-    } else if (k === ' ') {
- const words = state.oskValue.trim().split(/\s+/);
-    const lastWord = words[words.length - 1];
-    speakCompletedWord(lastWord);
+    state.oskValue += k; document.getElementById('onscreenDisplay').innerText = state.oskValue;
+    if (k !== ' ' && !isPunctuation(k)) speak(k.toLowerCase());
+    else if (k === ' ') {
+        // NO speak('space') here
+        const words = state.oskValue.trim().split(/\s+/);
+        const lastWord = words[words.length - 1];
+        speakCompletedWord(lastWord);
     }
-    
-    // Check if complete
     const targetText = document.getElementById('target').innerText;
     const currentClean = removePunctuation(state.oskValue.trim().toLowerCase());
     const targetClean = removePunctuation(targetText.trim().toLowerCase());
-    
-    if (currentClean === targetClean && state.oskValue.length > 0) {
-        setTimeout(() => speak(targetText), 300);
+    if (currentClean.length >= targetClean.length && currentClean.length > 0) {
+        setTimeout(() => { speak(targetText); setTimeout(() => checkAnswer(state.oskValue), 2000); }, 500);
     }
-    
-    if (state.oskValue.length >= targetText.length) checkAnswer(state.oskValue);
 }
-function oskAction(a) {
-    if (a === 'back') state.oskValue = state.oskValue.slice(0, -1);
-    else if (a === 'clear') state.oskValue = '';
-    else if (a === 'space') state.oskValue += ' ';
-    else if (a === 'submit') { checkAnswer(state.oskValue); return; }
-    document.getElementById('onscreenDisplay').innerText = state.oskValue;
-}
+function oskAction(a) { if (a === 'back') state.oskValue = state.oskValue.slice(0, -1); else if (a === 'clear') state.oskValue = ''; else if (a === 'space') oskType(' '); else if (a === 'submit') { checkAnswer(state.oskValue); return; } document.getElementById('onscreenDisplay').innerText = state.oskValue; }
 
-// ============================================================
-// SWITCH SCANNING
-// ============================================================
-function startSwitchScan() {
-    state.switchItems = 'abcdefghijklmnopqrstuvwxyz '.split(''); state.switchIndex = 0;
-    highlightSwitch();
-    state.switchInterval = setInterval(() => { state.switchIndex = (state.switchIndex + 1) % state.switchItems.length; highlightSwitch(); }, 1000);
-}
-function highlightSwitch() {
-    const c = state.switchItems[state.switchIndex];
-    document.getElementById('switchRow').innerText = c === ' ' ? '␣ SPACE' : c.toUpperCase();
-    document.getElementById('switchRow').classList.add('switch-highlight');
-    speak(c === ' ' ? 'space' : c, 1.2);
-}
+function startSwitchScan() { state.switchItems = 'abcdefghijklmnopqrstuvwxyz '.split(''); state.switchIndex = 0; highlightSwitch(); state.switchInterval = setInterval(() => { state.switchIndex = (state.switchIndex + 1) % state.switchItems.length; highlightSwitch(); }, 1000); }
+function highlightSwitch() { const c = state.switchItems[state.switchIndex]; document.getElementById('switchRow').innerText = c === ' ' ? '␣ SPACE' : c.toUpperCase(); document.getElementById('switchRow').classList.add('switch-highlight'); speak(c === ' ' ? 'space' : c, 1.2); }
 function stopSwitchScan() { if (state.switchInterval) clearInterval(state.switchInterval); state.switchInterval = null; }
 function switchAction(a) {
     if (a === 'select') {
         state.switchValue += state.switchItems[state.switchIndex];
         document.getElementById('switchDisplay').innerText = state.switchValue;
-        
-        // Speak the character
         const c = state.switchItems[state.switchIndex];
         if (c !== ' ') speak(c.toLowerCase());
-        
-        
-        // Check if complete
+        else {
+            // NO speak('space') here
+            const words = state.switchValue.trim().split(/\s+/);
+            const lastWord = words[words.length - 1];
+            speakCompletedWord(lastWord);
+        }
         const targetText = document.getElementById('target').innerText;
         const currentClean = removePunctuation(state.switchValue.trim().toLowerCase());
         const targetClean = removePunctuation(targetText.trim().toLowerCase());
-        
-        if (currentClean === targetClean && state.switchValue.length > 0) {
-            setTimeout(() => speak(targetText), 300);
-        }
-        
-        if (state.switchValue.length >= targetText.length) { stopSwitchScan(); checkAnswer(state.switchValue); }
+        if (currentClean.length >= targetClean.length && currentClean.length > 0) { stopSwitchScan(); setTimeout(() => { speak(targetText); setTimeout(() => checkAnswer(state.switchValue), 2000); }, 500); }
     } else if (a === 'next') { state.switchIndex = (state.switchIndex + 1) % state.switchItems.length; highlightSwitch(); }
 }
 
-// ============================================================
-// EYE GAZE
-// ============================================================
 let webgazerInitialized = false;
-function startEyeGaze() {
-    document.getElementById('gazeCursor').classList.add('active'); state.eyegazeActive = true;
-    if (!webgazerInitialized) {
-        webgazer.setGazeListener((data) => {
-            if (!state.eyegazeActive || data == null) return;
-            const cursor = document.getElementById('gazeCursor');
-            cursor.style.left = data.x + 'px'; cursor.style.top = data.y + 'px';
-            checkGazeDwell(data.x, data.y);
-        }).begin();
-        webgazer.showVideoPreview(false); webgazer.showPredictionPoints(false);
-        webgazerInitialized = true;
-    } else { webgazer.resume(); }
-    document.querySelectorAll('.gaze-key').forEach(btn => { btn.dataset.gaze = btn.dataset.gaze || btn.innerText.trim().toLowerCase(); });
-}
-function stopEyeGaze() {
-    state.eyegazeActive = false; document.getElementById('gazeCursor').classList.remove('active');
-    if (state.dwellTimeout) { clearTimeout(state.dwellTimeout); state.dwellTimeout = null; }
-    document.getElementById('gazeCursor').classList.remove('dwelling');
-    if (webgazerInitialized) { try { webgazer.pause(); } catch(e) {} }
-}
-function checkGazeDwell(x, y) {
-    const elements = document.elementsFromPoint(x, y);
-    const gazeEl = elements.find(el => el.dataset && el.dataset.gaze);
-    const cursor = document.getElementById('gazeCursor');
-    if (gazeEl) {
-        if (cursor.dataset.currentTarget !== gazeEl) {
-            cursor.dataset.currentTarget = gazeEl;
-            if (state.dwellTimeout) clearTimeout(state.dwellTimeout);
-            cursor.classList.add('dwelling');
-            state.dwellTimeout = setTimeout(() => {
-                const action = gazeEl.dataset.gaze;
-                cursor.classList.remove('dwelling'); cursor.dataset.currentTarget = '';
-                triggerGazeAction(action);
-            }, state.dwellTime);
-        }
-    } else {
-        if (state.dwellTimeout) clearTimeout(state.dwellTimeout);
-        cursor.classList.remove('dwelling'); cursor.dataset.currentTarget = '';
-    }
-}
+function startEyeGaze() { document.getElementById('gazeCursor').classList.add('active'); state.eyegazeActive = true; if (!webgazerInitialized) { webgazer.setGazeListener((data) => { if (!state.eyegazeActive || data == null) return; const cursor = document.getElementById('gazeCursor'); cursor.style.left = data.x + 'px'; cursor.style.top = data.y + 'px'; checkGazeDwell(data.x, data.y); }).begin(); webgazer.showVideoPreview(false); webgazer.showPredictionPoints(false); webgazerInitialized = true; } else { webgazer.resume(); } document.querySelectorAll('.gaze-key').forEach(btn => { btn.dataset.gaze = btn.dataset.gaze || btn.innerText.trim().toLowerCase(); }); }
+function stopEyeGaze() { state.eyegazeActive = false; document.getElementById('gazeCursor').classList.remove('active'); if (state.dwellTimeout) { clearTimeout(state.dwellTimeout); state.dwellTimeout = null; } document.getElementById('gazeCursor').classList.remove('dwelling'); if (webgazerInitialized) { try { webgazer.pause(); } catch(e) {} } }
+function checkGazeDwell(x, y) { const elements = document.elementsFromPoint(x, y); const gazeEl = elements.find(el => el.dataset && el.dataset.gaze); const cursor = document.getElementById('gazeCursor'); if (gazeEl) { if (cursor.dataset.currentTarget !== gazeEl) { cursor.dataset.currentTarget = gazeEl; if (state.dwellTimeout) clearTimeout(state.dwellTimeout); cursor.classList.add('dwelling'); state.dwellTimeout = setTimeout(() => { const action = gazeEl.dataset.gaze; cursor.classList.remove('dwelling'); cursor.dataset.currentTarget = ''; triggerGazeAction(action); }, state.dwellTime); } } else { if (state.dwellTimeout) clearTimeout(state.dwellTimeout); cursor.classList.remove('dwelling'); cursor.dataset.currentTarget = ''; } }
 function triggerGazeAction(action) {
-    if (action === 'space') eyegazeType(' ');
-    else if (action === 'back') { state.eyegazeValue = state.eyegazeValue.slice(0, -1); document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue; }
+    if (action === 'space') {
+        state.eyegazeValue += ' '; document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue;
+        // NO speak('space') here
+        const words = state.eyegazeValue.trim().split(/\s+/);
+        const lastWord = words[words.length - 1];
+        speakCompletedWord(lastWord);
+    } else if (action === 'back') { state.eyegazeValue = state.eyegazeValue.slice(0, -1); document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue; }
     else if (action === 'clear') { state.eyegazeValue = ''; document.getElementById('eyegazeDisplay').innerText = ''; }
     else if (action === 'submit') checkAnswer(state.eyegazeValue);
     else eyegazeType(action);
 }
-function eyegazeType(k) {
-    state.eyegazeValue += k; 
-    document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue;
-    
-    // Speak the character
-    if (k !== ' ' && !isPunctuation(k)) {
-        speak(k.toLowerCase());
-    } else if (k === ' ') {
-       
-    }
-    
-    // Check if complete
-    const targetText = document.getElementById('target').innerText;
-    const currentClean = removePunctuation(state.eyegazeValue.trim().toLowerCase());
-    const targetClean = removePunctuation(targetText.trim().toLowerCase());
-    
-    if (currentClean === targetClean && state.eyegazeValue.length > 0) {
-        setTimeout(() => speak(targetText), 300);
-    }
-    
-    if (state.eyegazeValue.length >= targetText.length) checkAnswer(state.eyegazeValue);
-}
-function recalibrateGaze() {
-    if (!webgazerInitialized) { alert('Starting eye gaze. Please allow camera access.'); startEyeGaze(); }
-    const points = [{x: window.innerWidth*0.2, y: window.innerHeight*0.3}, {x: window.innerWidth*0.8, y: window.innerHeight*0.3}, {x: window.innerWidth*0.5, y: window.innerHeight*0.5}, {x: window.innerWidth*0.2, y: window.innerHeight*0.7}, {x: window.innerWidth*0.8, y: window.innerHeight*0.7}];
-    let i = 0;
-    function showNext() {
-        if (i >= points.length) { document.querySelectorAll('.calib-dot').forEach(d => d.remove()); alert('✅ Calibration complete!'); return; }
-        document.querySelectorAll('.calib-dot').forEach(d => d.remove());
-        const dot = document.createElement('div'); dot.className = 'calib-dot';
-        dot.style.left = points[i].x + 'px'; dot.style.top = points[i].y + 'px';
-        document.body.appendChild(dot);
-        setTimeout(() => { try { webgazer.recordScreenPosition(points[i].x, points[i].y, 'click'); } catch(e) {} i++; setTimeout(showNext, 1200); }, 1500);
-    }
-    showNext();
-}
+function eyegazeType(k) { state.eyegazeValue += k; document.getElementById('eyegazeDisplay').innerText = state.eyegazeValue; if (k !== ' ' && !isPunctuation(k)) speak(k.toLowerCase()); const targetText = document.getElementById('target').innerText; const currentClean = removePunctuation(state.eyegazeValue.trim().toLowerCase()); const targetClean = removePunctuation(targetText.trim().toLowerCase()); if (currentClean.length >= targetClean.length && currentClean.length > 0) { setTimeout(() => { speak(targetText); setTimeout(() => checkAnswer(state.eyegazeValue), 2000); }, 500); } }
+function recalibrateGaze() { if (!webgazerInitialized) { alert('Starting eye gaze. Please allow camera access.'); startEyeGaze(); } const points = [{x: window.innerWidth*0.2, y: window.innerHeight*0.3}, {x: window.innerWidth*0.8, y: window.innerHeight*0.3}, {x: window.innerWidth*0.5, y: window.innerHeight*0.5}, {x: window.innerWidth*0.2, y: window.innerHeight*0.7}, {x: window.innerWidth*0.8, y: window.innerHeight*0.7}]; let i = 0; function showNext() { if (i >= points.length) { document.querySelectorAll('.calib-dot').forEach(d => d.remove()); alert('✅ Calibration complete!'); return; } document.querySelectorAll('.calib-dot').forEach(d => d.remove()); const dot = document.createElement('div'); dot.className = 'calib-dot'; dot.style.left = points[i].x + 'px'; dot.style.top = points[i].y + 'px'; document.body.appendChild(dot); setTimeout(() => { try { webgazer.recordScreenPosition(points[i].x, points[i].y, 'click'); } catch(e) {} i++; setTimeout(showNext, 1200); }, 1500); } showNext(); }
 
 // ============================================================
-// HINTS & CHECKING - PUNCTUATION INSENSITIVE
+// HINTS & CHECKING
 // ============================================================
-function giveHint() {
-    const target = document.getElementById('target').innerText;
-    state.currentHintLevel++;
-    const msg = document.getElementById('msg');
-    if (state.currentHintLevel === 1) { msg.innerHTML = '💡 Starts with: <b>' + target[0].toUpperCase() + '</b>'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Starts with ' + target[0]); }
-    else if (state.currentHintLevel === 2) { msg.innerHTML = '💡 Starts with <b>' + target[0] + '</b>, ends with <b>' + target[target.length-1] + '</b>'; speak('Starts with ' + target[0] + ', ends with ' + target[target.length-1]); }
-    else if (state.supportLevel === 'errorless') {
-        const input = document.getElementById('studentInput');
-        if (!input.classList.contains('hidden')) { input.value = target; checkAnswer(target); }
-        else if (state.inputMethod === 'onscreen') { state.oskValue = target; document.getElementById('onscreenDisplay').innerText = target; checkAnswer(target); }
-        else if (state.inputMethod === 'switch') { state.switchValue = target; document.getElementById('switchDisplay').innerText = target; stopSwitchScan(); checkAnswer(target); }
-        else if (state.inputMethod === 'eyegaze') { state.eyegazeValue = target; document.getElementById('eyegazeDisplay').innerText = target; checkAnswer(target); }
-    }
-}
+function giveHint() { const target = document.getElementById('target').innerText; state.currentHintLevel++; const msg = document.getElementById('msg'); if (state.currentHintLevel === 1) { msg.innerHTML = '💡 Starts with: <b>' + target[0].toUpperCase() + '</b>'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Starts with ' + target[0]); } else if (state.currentHintLevel === 2) { msg.innerHTML = '💡 Starts with <b>' + target[0] + '</b>, ends with <b>' + target[target.length-1] + '</b>'; speak('Starts with ' + target[0] + ', ends with ' + target[target.length-1]); } else if (state.supportLevel === 'errorless') { const input = document.getElementById('studentInput'); if (!input.classList.contains('hidden')) { input.value = target; checkAnswer(target); } else if (state.inputMethod === 'onscreen') { state.oskValue = target; document.getElementById('onscreenDisplay').innerText = target; checkAnswer(target); } else if (state.inputMethod === 'switch') { state.switchValue = target; document.getElementById('switchDisplay').innerText = target; stopSwitchScan(); checkAnswer(target); } else if (state.inputMethod === 'eyegaze') { state.eyegazeValue = target; document.getElementById('eyegazeDisplay').innerText = target; checkAnswer(target); } } }
 
-// FIXED: Punctuation-insensitive checking
 function checkAnswer(val) {
     const target = document.getElementById('target').innerText;
     const msg = document.getElementById('msg');
     state.sessionTrials++;
-    
-    // Remove punctuation from both before comparing
     const valClean = removePunctuation(val.trim().toLowerCase());
     const targetClean = removePunctuation(target.trim().toLowerCase());
-    
     const correct = valClean === targetClean;
-    
     if (correct) {
-        state.sessionCorrect++; state.tokens++;
-        localStorage.setItem('tokens', state.tokens);
+        state.sessionCorrect++; state.tokens++; localStorage.setItem('tokens', state.tokens);
         document.getElementById('studentInput').classList.add('input-correct');
         msg.innerHTML = '🎉 Correct!'; msg.className = "text-center font-black text-2xl text-emerald-600";
-        speak('Correct! Great job! ' + target); 
-        recordProgress(true); updateTokenBar();
+        speak('Correct! Great job!'); recordProgress(true); updateTokenBar();
         setTimeout(() => { state.currentIndex++; if (state.currentIndex < state.activeItems.length) setupGameScreen(); else endSession(); }, 2500);
     } else {
         document.getElementById('studentInput').classList.add('input-wrong');
@@ -1139,336 +764,69 @@ function checkAnswer(val) {
     }
 }
 
-function recordProgress(correct) {
-    const data = JSON.parse(localStorage.getItem('progressData') || '[]');
-    data.push({ date: new Date().toISOString(), studentId: state.currentStudentId || 'default', mode: state.mode, item: document.getElementById('target').innerText, correct: correct, inputMethod: state.inputMethod, support: state.supportLevel });
-    localStorage.setItem('progressData', JSON.stringify(data.slice(-500)));
-}
-
-function updateTokenDisplay() {
-    const d = document.getElementById('tokenDisplay'); d.innerHTML = '';
-    for (let i = 0; i < Math.min(state.tokens, 30); i++) { const s = document.createElement('span'); s.innerText = '⭐'; d.appendChild(s); }
-    if (state.tokens > 30) { const more = document.createElement('span'); more.innerText = ` +${state.tokens - 30}`; more.className = 'font-bold text-xl'; d.appendChild(more); }
-}
-function updateTokenBar() {
-    ['tokenBar', 'matchTokenBar', 'buildTokenBar', 'hwTokenBar'].forEach(id => {
-        const el = document.getElementById(id); if (!el) return; el.innerHTML = '';
-        for (let i = 0; i < state.activeItems.length; i++) { const s = document.createElement('span'); s.innerText = i < state.currentIndex ? '⭐' : '☆'; el.appendChild(s); }
-    });
-}
-function endSession() {
-    document.getElementById('endStars').innerText = state.sessionCorrect;
-    document.getElementById('endStats').innerText = `${state.sessionCorrect} correct of ${state.sessionTrials} attempts`;
-    const d = document.getElementById('endTokenDisplay'); d.innerHTML = '';
-    for (let i = 0; i < state.sessionCorrect; i++) { const s = document.createElement('span'); s.innerText = '⭐'; s.className = 'token-earned'; s.style.animationDelay = (i * 0.1) + 's'; d.appendChild(s); }
-    showScreen('endScreen'); speak('Amazing work! You earned ' + state.sessionCorrect + ' stars!');
-}
+function recordProgress(correct) { const data = JSON.parse(localStorage.getItem('progressData') || '[]'); data.push({ date: new Date().toISOString(), studentId: state.currentStudentId || 'default', mode: state.mode, item: document.getElementById('target').innerText, correct: correct, inputMethod: state.inputMethod, support: state.supportLevel }); localStorage.setItem('progressData', JSON.stringify(data.slice(-500))); }
+function updateTokenDisplay() { const d = document.getElementById('tokenDisplay'); d.innerHTML = ''; for (let i = 0; i < Math.min(state.tokens, 30); i++) { const s = document.createElement('span'); s.innerText = '⭐'; d.appendChild(s); } if (state.tokens > 30) { const more = document.createElement('span'); more.innerText = ` +${state.tokens - 30}`; more.className = 'font-bold text-xl'; d.appendChild(more); } }
+function updateTokenBar() { ['tokenBar', 'matchTokenBar', 'buildTokenBar', 'hwTokenBar'].forEach(id => { const el = document.getElementById(id); if (!el) return; el.innerHTML = ''; for (let i = 0; i < state.activeItems.length; i++) { const s = document.createElement('span'); s.innerText = i < state.currentIndex ? '⭐' : '☆'; el.appendChild(s); } }); }
+function endSession() { document.getElementById('endStars').innerText = state.sessionCorrect; document.getElementById('endStats').innerText = `${state.sessionCorrect} correct of ${state.sessionTrials} attempts`; const d = document.getElementById('endTokenDisplay'); d.innerHTML = ''; for (let i = 0; i < state.sessionCorrect; i++) { const s = document.createElement('span'); s.innerText = '⭐'; s.className = 'token-earned'; s.style.animationDelay = (i * 0.1) + 's'; d.appendChild(s); } showScreen('endScreen'); speak('Amazing work! You earned ' + state.sessionCorrect + ' stars!'); }
 function replaySession() { beginSession(); }
 
 // ============================================================
-// MATCHING & BUILD & HANDWRITING & STORIES
+// MATCHING, BUILD, HANDWRITING, STORIES
 // ============================================================
-function startMatching() {
-    state.matchState.items = [...wordBank].sort(() => 0.5 - Math.random()).slice(0, 5);
-    state.matchState.current = 0; state.matchState.correct = 0;
-    state.activeItems = state.matchState.items; state.currentIndex = 0;
-    showMatchItem();
-}
-function showMatchItem() {
-    if (state.matchState.current >= state.matchState.items.length) {
-        state.sessionCorrect = state.matchState.correct; state.tokens += state.matchState.correct;
-        localStorage.setItem('tokens', state.tokens); endSession(); return;
-    }
-    const item = state.matchState.items[state.matchState.current];
-    document.getElementById('matchTargetVisual').innerText = item.emoji;
-    document.getElementById('matchProgress').innerText = `Match ${state.matchState.current + 1} of ${state.matchState.items.length}`;
-    const distractors = wordBank.filter(w => w.text !== item.text).sort(() => 0.5 - Math.random()).slice(0, 3);
-    const options = [item, ...distractors].sort(() => 0.5 - Math.random());
-    const container = document.getElementById('matchOptions'); container.innerHTML = '';
-    options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'p-6 card border-4 rounded-3xl text-2xl font-black hover:border-indigo-500';
-        btn.innerText = opt.text;
-        btn.onclick = () => checkMatch(opt.text === item.text, btn);
-        container.appendChild(btn);
-    });
-    speak(item.text);
-}
-function checkMatch(correct, btn) {
-    const msg = document.getElementById('matchMsg');
-    if (correct) {
-        btn.classList.add('input-correct'); msg.innerHTML = '🎉 Correct!'; msg.className = "text-center font-black text-2xl text-emerald-600";
-        speak('Correct!'); state.matchState.correct++;
-        setTimeout(() => { state.matchState.current++; msg.innerText = ''; showMatchItem(); }, 1500);
-    } else {
-        btn.classList.add('input-wrong'); msg.innerHTML = '🤔 Try again!'; msg.className = "text-center font-black text-lg text-amber-600";
-        speak('Try again');
-        setTimeout(() => { btn.classList.remove('input-wrong'); msg.innerText = ''; }, 1200);
-    }
-}
+function startMatching() { state.matchState.items = [...wordBank].sort(() => 0.5 - Math.random()).slice(0, 5); state.matchState.current = 0; state.matchState.correct = 0; state.activeItems = state.matchState.items; state.currentIndex = 0; showMatchItem(); }
+function showMatchItem() { if (state.matchState.current >= state.matchState.items.length) { state.sessionCorrect = state.matchState.correct; state.tokens += state.matchState.correct; localStorage.setItem('tokens', state.tokens); endSession(); return; } const item = state.matchState.items[state.matchState.current]; document.getElementById('matchTargetVisual').innerText = item.emoji; document.getElementById('matchProgress').innerText = `Match ${state.matchState.current + 1} of ${state.matchState.items.length}`; const distractors = wordBank.filter(w => w.text !== item.text).sort(() => 0.5 - Math.random()).slice(0, 3); const options = [item, ...distractors].sort(() => 0.5 - Math.random()); const container = document.getElementById('matchOptions'); container.innerHTML = ''; options.forEach(opt => { const btn = document.createElement('button'); btn.className = 'p-6 card border-4 rounded-3xl text-2xl font-black hover:border-indigo-500'; btn.innerText = opt.text; btn.onclick = () => checkMatch(opt.text === item.text, btn); container.appendChild(btn); }); speak(item.text); }
+function checkMatch(correct, btn) { const msg = document.getElementById('matchMsg'); if (correct) { btn.classList.add('input-correct'); msg.innerHTML = '🎉 Correct!'; msg.className = "text-center font-black text-2xl text-emerald-600"; speak('Correct!'); state.matchState.correct++; setTimeout(() => { state.matchState.current++; msg.innerText = ''; showMatchItem(); }, 1500); } else { btn.classList.add('input-wrong'); msg.innerHTML = '🤔 Try again!'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Try again'); setTimeout(() => { btn.classList.remove('input-wrong'); msg.innerText = ''; }, 1200); } }
 function speakMatchTarget() { speak(state.matchState.items[state.matchState.current].text); }
 
-function startBuild() {
-    const sentences = [{ text: "I want water.", emoji: "💧", words: ["I", "want", "water"] }, { text: "The cat is big.", emoji: "🐱", words: ["The", "cat", "is", "big"] }, { text: "I feel happy.", emoji: "😊", words: ["I", "feel", "happy"] }, { text: "Look at the sun.", emoji: "☀️", words: ["Look", "at", "the", "sun"] }, { text: "She is my friend.", emoji: "👧", words: ["She", "is", "my", "friend"] }];
-    state.buildState.items = sentences.sort(() => 0.5 - Math.random()).slice(0, 5);
-    state.buildState.current = 0; state.buildState.correct = 0;
-    state.activeItems = state.buildState.items; state.currentIndex = 0;
-    showBuildItem();
-}
-function showBuildItem() {
-    if (state.buildState.current >= state.buildState.items.length) {
-        state.sessionCorrect = state.buildState.correct; state.tokens += state.buildState.correct;
-        localStorage.setItem('tokens', state.tokens); endSession(); return;
-    }
-    const item = state.buildState.items[state.buildState.current];
-    state.buildState.answer = [];
-    document.getElementById('buildTargetVisual').innerText = item.emoji;
-    document.getElementById('buildProgress').innerText = `Sentence ${state.buildState.current + 1} of ${state.buildState.items.length}`;
-    document.getElementById('buildAnswer').innerHTML = '<span class="opacity-50">Tap words to build</span>';
-    const tiles = document.createElement('div'); tiles.id = 'buildTiles'; tiles.className = 'flex flex-wrap gap-3 justify-center';
-    [...item.words].sort(() => 0.5 - Math.random()).forEach(w => {
-        const t = document.createElement('button');
-        t.className = 'px-6 py-4 card border-4 border-indigo-300 rounded-2xl text-xl font-black hover:scale-105';
-        t.innerText = w; t.dataset.word = w; t.onclick = () => buildAdd(t);
-        tiles.appendChild(t);
-    });
-    document.getElementById('buildTiles').replaceWith(tiles);
-    speak(item.text);
-}
-function buildAdd(tile) {
-    if (tile.classList.contains('used')) return;
-    state.buildState.answer.push(tile.dataset.word); tile.classList.add('used');
-    renderBuildAnswer(); speak(tile.dataset.word);
-}
-function renderBuildAnswer() {
-    const c = document.getElementById('buildAnswer'); c.innerHTML = '';
-    if (!state.buildState.answer.length) { c.innerHTML = '<span class="opacity-50">Tap words to build</span>'; return; }
-    state.buildState.answer.forEach(w => { const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-100 rounded-xl'; s.innerText = w; c.appendChild(s); });
-}
-function buildUndo() {
-    if (!state.buildState.answer.length) return;
-    const w = state.buildState.answer.pop();
-    document.querySelectorAll('#buildTiles button').forEach(t => { if (t.dataset.word === w && t.classList.contains('used')) t.classList.remove('used'); });
-    renderBuildAnswer();
-}
-function buildClear() {
-    state.buildState.answer = [];
-    document.querySelectorAll('#buildTiles button').forEach(t => t.classList.remove('used'));
-    renderBuildAnswer();
-}
-function buildCheck() {
-    const item = state.buildState.items[state.buildState.current];
-    const msg = document.getElementById('buildMsg');
-    if (state.buildState.answer.join(' ') === item.words.join(' ')) {
-        msg.innerHTML = '🎉 Perfect!'; msg.className = "text-center font-black text-2xl text-emerald-600";
-        speak('Perfect!'); state.buildState.correct++;
-        setTimeout(() => { state.buildState.current++; msg.innerText = ''; showBuildItem(); }, 2000);
-    } else {
-        msg.innerHTML = '🤔 Try again!'; msg.className = "text-center font-black text-lg text-amber-600";
-        speak('Try again.'); setTimeout(() => { msg.innerText = ''; }, 1500);
-    }
-}
+function startBuild() { const sentences = [{ text: "I want water.", emoji: "💧", words: ["I", "want", "water"] }, { text: "The cat is big.", emoji: "🐱", words: ["The", "cat", "is", "big"] }, { text: "I feel happy.", emoji: "😊", words: ["I", "feel", "happy"] }, { text: "Look at the sun.", emoji: "☀️", words: ["Look", "at", "the", "sun"] }, { text: "She is my friend.", emoji: "", words: ["She", "is", "my", "friend"] }]; state.buildState.items = sentences.sort(() => 0.5 - Math.random()).slice(0, 5); state.buildState.current = 0; state.buildState.correct = 0; state.activeItems = state.buildState.items; state.currentIndex = 0; showBuildItem(); }
+function showBuildItem() { if (state.buildState.current >= state.buildState.items.length) { state.sessionCorrect = state.buildState.correct; state.tokens += state.buildState.correct; localStorage.setItem('tokens', state.tokens); endSession(); return; } const item = state.buildState.items[state.buildState.current]; state.buildState.answer = []; document.getElementById('buildTargetVisual').innerText = item.emoji; document.getElementById('buildProgress').innerText = `Sentence ${state.buildState.current + 1} of ${state.buildState.items.length}`; document.getElementById('buildAnswer').innerHTML = '<span class="opacity-50">Tap words to build</span>'; const tiles = document.createElement('div'); tiles.id = 'buildTiles'; tiles.className = 'flex flex-wrap gap-3 justify-center'; [...item.words].sort(() => 0.5 - Math.random()).forEach(w => { const t = document.createElement('button'); t.className = 'px-6 py-4 card border-4 border-indigo-300 rounded-2xl text-xl font-black hover:scale-105'; t.innerText = w; t.dataset.word = w; t.onclick = () => buildAdd(t); tiles.appendChild(t); }); document.getElementById('buildTiles').replaceWith(tiles); speak(item.text); }
+function buildAdd(tile) { if (tile.classList.contains('used')) return; state.buildState.answer.push(tile.dataset.word); tile.classList.add('used'); renderBuildAnswer(); speak(tile.dataset.word); }
+function renderBuildAnswer() { const c = document.getElementById('buildAnswer'); c.innerHTML = ''; if (!state.buildState.answer.length) { c.innerHTML = '<span class="opacity-50">Tap words to build</span>'; return; } state.buildState.answer.forEach(w => { const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-100 rounded-xl'; s.innerText = w; c.appendChild(s); }); }
+function buildUndo() { if (!state.buildState.answer.length) return; const w = state.buildState.answer.pop(); document.querySelectorAll('#buildTiles button').forEach(t => { if (t.dataset.word === w && t.classList.contains('used')) t.classList.remove('used'); }); renderBuildAnswer(); }
+function buildClear() { state.buildState.answer = []; document.querySelectorAll('#buildTiles button').forEach(t => t.classList.remove('used')); renderBuildAnswer(); }
+function buildCheck() { const item = state.buildState.items[state.buildState.current]; const msg = document.getElementById('buildMsg'); if (state.buildState.answer.join(' ') === item.words.join(' ')) { msg.innerHTML = '🎉 Perfect!'; msg.className = "text-center font-black text-2xl text-emerald-600"; speak('Perfect!'); state.buildState.correct++; setTimeout(() => { state.buildState.current++; msg.innerText = ''; showBuildItem(); }, 2000); } else { msg.innerHTML = '🤔 Try again!'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Try again.'); setTimeout(() => { msg.innerText = ''; }, 1500); } }
 function speakBuildTarget() { speak(state.buildState.items[state.buildState.current].text); }
 
 let hwCanvas, hwCtx;
-function startHandwriting() {
-    state.hwItems = [...handwritingBank].sort(() => 0.5 - Math.random()).slice(0, state.itemCount);
-    state.hwIndex = 0; state.sessionCorrect = 0;
-    state.activeItems = state.hwItems.map(l => ({ text: l, emoji: '✍️' })); state.currentIndex = 0;
-    hwCanvas = document.getElementById('handwritingCanvas'); hwCtx = hwCanvas.getContext('2d');
-    setupCanvas(); showHWItem();
-}
-function setupCanvas() {
-    hwCtx.strokeStyle = '#6366f1'; hwCtx.lineWidth = 8; hwCtx.lineCap = 'round'; hwCtx.lineJoin = 'round';
-    hwCanvas.onmousedown = (e) => hwStart(e.offsetX, e.offsetY);
-    hwCanvas.onmousemove = (e) => { if (state.hwDrawing) hwMove(e.offsetX, e.offsetY); };
-    hwCanvas.onmouseup = hwEnd; hwCanvas.onmouseleave = hwEnd;
-    hwCanvas.ontouchstart = (e) => { e.preventDefault(); const t = e.touches[0]; const rect = hwCanvas.getBoundingClientRect(); hwStart((t.clientX - rect.left) * (hwCanvas.width / rect.width), (t.clientY - rect.top) * (hwCanvas.height / rect.height)); };
-    hwCanvas.ontouchmove = (e) => { e.preventDefault(); if (!state.hwDrawing) return; const t = e.touches[0]; const rect = hwCanvas.getBoundingClientRect(); hwMove((t.clientX - rect.left) * (hwCanvas.width / rect.width), (t.clientY - rect.top) * (hwCanvas.height / rect.height)); };
-    hwCanvas.ontouchend = hwEnd;
-}
+function startHandwriting() { state.hwItems = [...handwritingBank].sort(() => 0.5 - Math.random()).slice(0, state.itemCount); state.hwIndex = 0; state.sessionCorrect = 0; state.activeItems = state.hwItems.map(l => ({ text: l, emoji: '✍️' })); state.currentIndex = 0; hwCanvas = document.getElementById('handwritingCanvas'); hwCtx = hwCanvas.getContext('2d'); setupCanvas(); showHWItem(); }
+function setupCanvas() { hwCtx.strokeStyle = '#6366f1'; hwCtx.lineWidth = 8; hwCtx.lineCap = 'round'; hwCtx.lineJoin = 'round'; hwCanvas.onmousedown = (e) => hwStart(e.offsetX, e.offsetY); hwCanvas.onmousemove = (e) => { if (state.hwDrawing) hwMove(e.offsetX, e.offsetY); }; hwCanvas.onmouseup = hwEnd; hwCanvas.onmouseleave = hwEnd; hwCanvas.ontouchstart = (e) => { e.preventDefault(); const t = e.touches[0]; const rect = hwCanvas.getBoundingClientRect(); hwStart((t.clientX - rect.left) * (hwCanvas.width / rect.width), (t.clientY - rect.top) * (hwCanvas.height / rect.height)); }; hwCanvas.ontouchmove = (e) => { e.preventDefault(); if (!state.hwDrawing) return; const t = e.touches[0]; const rect = hwCanvas.getBoundingClientRect(); hwMove((t.clientX - rect.left) * (hwCanvas.width / rect.width), (t.clientY - rect.top) * (hwCanvas.height / rect.height)); }; hwCanvas.ontouchend = hwEnd; }
 function hwStart(x, y) { state.hwDrawing = true; state.hwLastPoint = { x, y }; state.hwStrokes.push([{ x, y }]); }
-function hwMove(x, y) {
-    if (!state.hwDrawing) return;
-    hwCtx.beginPath(); hwCtx.moveTo(state.hwLastPoint.x, state.hwLastPoint.y); hwCtx.lineTo(x, y); hwCtx.stroke();
-    state.hwStrokes[state.hwStrokes.length - 1].push({ x, y }); state.hwLastPoint = { x, y };
-}
+function hwMove(x, y) { if (!state.hwDrawing) return; hwCtx.beginPath(); hwCtx.moveTo(state.hwLastPoint.x, state.hwLastPoint.y); hwCtx.lineTo(x, y); hwCtx.stroke(); state.hwStrokes[state.hwStrokes.length - 1].push({ x, y }); state.hwLastPoint = { x, y }; }
 function hwEnd() { state.hwDrawing = false; }
-function showHWItem() {
-    if (state.hwIndex >= state.hwItems.length) { state.tokens += state.sessionCorrect; localStorage.setItem('tokens', state.tokens); endSession(); return; }
-    const letter = state.hwItems[state.hwIndex];
-    document.getElementById('hwTarget').innerText = letter; document.getElementById('letterGuide').innerText = letter;
-    document.getElementById('hwProgress').innerText = `Letter ${state.hwIndex + 1} of ${state.hwItems.length}`;
-    document.getElementById('hwTargetVisual').innerText = '✍️'; hwClear(); updateTokenBar(); speak(letter);
-    const tips = { 'A': "Start at the top. Go down-left, then down-right. Cross in the middle.", 'B': "Start at top. Go down. Back to top, make two bumps.", 'O': "Start at top. Go around in a circle. Close it at the top.", 'S': "Start at top. Curve right, then left, then right again." };
-    document.getElementById('hwTips') && (document.getElementById('hwTips').innerText = tips[letter] || "Follow the dotted letter carefully.");
-}
+function showHWItem() { if (state.hwIndex >= state.hwItems.length) { state.tokens += state.sessionCorrect; localStorage.setItem('tokens', state.tokens); endSession(); return; } const letter = state.hwItems[state.hwIndex]; document.getElementById('hwTarget').innerText = letter; document.getElementById('letterGuide').innerText = letter; document.getElementById('hwProgress').innerText = `Letter ${state.hwIndex + 1} of ${state.hwItems.length}`; document.getElementById('hwTargetVisual').innerText = '✍️'; hwClear(); updateTokenBar(); speak(letter); const tips = { 'A': "Start at the top. Go down-left, then down-right. Cross in the middle.", 'B': "Start at top. Go down. Back to top, make two bumps.", 'O': "Start at top. Go around in a circle. Close it at the top.", 'S': "Start at top. Curve right, then left, then right again." }; document.getElementById('hwTips') && (document.getElementById('hwTips').innerText = tips[letter] || "Follow the dotted letter carefully."); }
 function hwClear() { hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height); state.hwStrokes = []; document.getElementById('hwMsg').innerText = ''; }
-function hwUndo() {
-    if (!state.hwStrokes.length) return; state.hwStrokes.pop(); hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height);
-    state.hwStrokes.forEach(stroke => { if (stroke.length < 2) return; hwCtx.beginPath(); hwCtx.moveTo(stroke[0].x, stroke[0].y); for (let i = 1; i < stroke.length; i++) hwCtx.lineTo(stroke[i].x, stroke[i].y); hwCtx.stroke(); });
-}
+function hwUndo() { if (!state.hwStrokes.length) return; state.hwStrokes.pop(); hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height); state.hwStrokes.forEach(stroke => { if (stroke.length < 2) return; hwCtx.beginPath(); hwCtx.moveTo(stroke[0].x, stroke[0].y); for (let i = 1; i < stroke.length; i++) hwCtx.lineTo(stroke[i].x, stroke[i].y); hwCtx.stroke(); }); }
 function hwShowGuide() { const guide = document.getElementById('letterGuide'); guide.style.color = guide.style.color === 'rgba(99, 102, 241, 0.5)' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(99, 102, 241, 0.5)'; }
-function hwCheck() {
-    const msg = document.getElementById('hwMsg');
-    const totalPoints = state.hwStrokes.reduce((sum, s) => sum + s.length, 0);
-    if (state.hwStrokes.length === 0 || totalPoints < 20) { msg.innerHTML = '✏️ Draw the letter first!'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Draw the letter first.'); return; }
-    const success = state.hwStrokes.length >= 1 && totalPoints >= 30;
-    if (success) {
-        state.sessionCorrect++; msg.innerHTML = '🎉 Great tracing! ⭐'; msg.className = "text-center font-black text-2xl text-emerald-600";
-        speak('Great job! Beautiful letter!');
-        setTimeout(() => { state.hwIndex++; state.currentIndex = state.hwIndex; showHWItem(); }, 2000);
-    } else { msg.innerHTML = '💪 Keep trying! Make bigger strokes.'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Keep trying. Make bigger strokes.'); }
-}
+function hwCheck() { const msg = document.getElementById('hwMsg'); const totalPoints = state.hwStrokes.reduce((sum, s) => sum + s.length, 0); if (state.hwStrokes.length === 0 || totalPoints < 20) { msg.innerHTML = '✏️ Draw the letter first!'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Draw the letter first.'); return; } const success = state.hwStrokes.length >= 1 && totalPoints >= 30; if (success) { state.sessionCorrect++; msg.innerHTML = ' Great tracing! ⭐'; msg.className = "text-center font-black text-2xl text-emerald-600"; speak('Great job! Beautiful letter!'); setTimeout(() => { state.hwIndex++; state.currentIndex = state.hwIndex; showHWItem(); }, 2000); } else { msg.innerHTML = '💪 Keep trying! Make bigger strokes.'; msg.className = "text-center font-black text-lg text-amber-600"; speak('Keep trying. Make bigger strokes.'); } }
 function hwSkip() { state.hwIndex++; state.currentIndex = state.hwIndex; showHWItem(); }
 function speakHWTarget() { speak(state.hwItems[state.hwIndex]); }
 
 function startStories() { state.storyIndex = 0; showStoryList(); }
-function showStoryList() {
-    const content = document.getElementById('storyContent');
-    content.innerHTML = `<h2 class="text-3xl font-black mb-4">📚 Choose a Story</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${socialStories.map((s, i) => `<button onclick="openStory(${i})" class="p-4 card border-4 border-pink-300 rounded-2xl text-left hover:scale-105 transition-all"><div class="font-black text-lg">${s.title}</div><div class="text-sm opacity-70">${s.pages.length} pages</div></button>`).join('')}</div>`;
-    document.getElementById('storyProgress').innerText = 'Story Selection';
-}
+function showStoryList() { const content = document.getElementById('storyContent'); content.innerHTML = `<h2 class="text-3xl font-black mb-4">📚 Choose a Story</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${socialStories.map((s, i) => `<button onclick="openStory(${i})" class="p-4 card border-4 border-pink-300 rounded-2xl text-left hover:scale-105 transition-all"><div class="font-black text-lg">${s.title}</div><div class="text-sm opacity-70">${s.pages.length} pages</div></button>`).join('')}</div>`; document.getElementById('storyProgress').innerText = 'Story Selection'; }
 function openStory(i) { state.storyIndex = i; state.storyPage = 0; state.currentStory = socialStories[i]; showStoryPage(); }
-function showStoryPage() {
-    const story = state.currentStory; const page = story.pages[state.storyPage];
-    document.getElementById('storyContent').innerHTML = `<div class="story-page space-y-4"><div class="text-9xl">${page.emoji}</div><p class="text-2xl font-bold leading-relaxed">${page.text}</p><div class="text-sm opacity-60">Page ${state.storyPage + 1} of ${story.pages.length}</div></div>`;
-    document.getElementById('storyProgress').innerText = story.title;
-    speak(page.text);
-}
-function storyNext() {
-    if (state.storyPage < state.currentStory.pages.length - 1) { state.storyPage++; showStoryPage(); }
-    else {
-        state.tokens += 2; localStorage.setItem('tokens', state.tokens);
-        document.getElementById('storyContent').innerHTML = `<div class="space-y-4"><div class="text-8xl">🎉</div><h2 class="text-3xl font-black text-emerald-600">Story Complete!</h2><p class="text-xl">You earned 2 stars for reading!</p><button onclick="showStoryList()" class="px-6 py-3 btn-primary rounded-2xl font-bold">📚 More Stories</button></div>`;
-        speak('Story complete! You earned 2 stars!');
-    }
-}
+function showStoryPage() { const story = state.currentStory; const page = story.pages[state.storyPage]; document.getElementById('storyContent').innerHTML = `<div class="story-page space-y-4"><div class="text-9xl">${page.emoji}</div><p class="text-2xl font-bold leading-relaxed">${page.text}</p><div class="text-sm opacity-60">Page ${state.storyPage + 1} of ${story.pages.length}</div></div>`; document.getElementById('storyProgress').innerText = story.title; speak(page.text); }
+function storyNext() { if (state.storyPage < state.currentStory.pages.length - 1) { state.storyPage++; showStoryPage(); } else { state.tokens += 2; localStorage.setItem('tokens', state.tokens); document.getElementById('storyContent').innerHTML = `<div class="space-y-4"><div class="text-8xl">🎉</div><h2 class="text-3xl font-black text-emerald-600">Story Complete!</h2><p class="text-xl">You earned 2 stars for reading!</p><button onclick="showStoryList()" class="px-6 py-3 btn-primary rounded-2xl font-bold">📚 More Stories</button></div>`; speak('Story complete! You earned 2 stars!'); } }
 function storyPrev() { if (state.storyPage > 0) { state.storyPage--; showStoryPage(); } else showStoryList(); }
 function storySpeak() { const page = state.currentStory.pages[state.storyPage]; speak(page.text); }
-
-function changeFontSize(id, delta) {
-    const el = document.getElementById(id);
-    const style = window.getComputedStyle(el, null).getPropertyValue('font-size');
-    el.style.fontSize = (parseFloat(style) + delta) + 'px';
-}
+function changeFontSize(id, delta) { const el = document.getElementById(id); const style = window.getComputedStyle(el, null).getPropertyValue('font-size'); el.style.fontSize = (parseFloat(style) + delta) + 'px'; }
 
 // ============================================================
 // TEACHER DASHBOARD & PDF
 // ============================================================
-function teacherLogin() {
-    if (document.getElementById('teacherPin').value === (localStorage.getItem('teacherPin') || '1234')) {
-        state.teacherLoggedIn = true; document.getElementById('teacherPin').value = ''; showScreen('teacherDashboard');
-    } else { alert('❌ Incorrect PIN'); }
-}
+function teacherLogin() { if (document.getElementById('teacherPin').value === (localStorage.getItem('teacherPin') || '1234')) { state.teacherLoggedIn = true; document.getElementById('teacherPin').value = ''; showScreen('teacherDashboard'); } else { alert('❌ Incorrect PIN'); } }
 function teacherLogout() { state.teacherLoggedIn = false; showScreen('homeScreen'); }
 function getStudents() { return JSON.parse(localStorage.getItem('students') || '[]'); }
 function saveStudents(students) { localStorage.setItem('students', JSON.stringify(students)); }
-function renderTeacherDashboard() {
-    const students = getStudents(); const data = JSON.parse(localStorage.getItem('progressData') || '[]');
-    document.getElementById('statStudents').innerText = students.length;
-    document.getElementById('statSessions').innerText = data.length;
-    document.getElementById('statAccuracy').innerText = data.length ? Math.round((data.filter(d => d.correct).length / data.length) * 100) + '%' : '0%';
-    const list = document.getElementById('studentList');
-    if (!students.length) { list.innerHTML = '<div class="card rounded-3xl border-2 p-8 text-center opacity-70">No students yet. Click "Add Student".</div>'; return; }
-    list.innerHTML = students.map(s => {
-        const sData = data.filter(d => d.studentId === s.id);
-        const acc = sData.length ? Math.round((sData.filter(d => d.correct).length / sData.length) * 100) : 0;
-        return `<div onclick="openStudent('${s.id}')" class="student-row card rounded-2xl border-2 p-4 cursor-pointer flex justify-between items-center hover:border-indigo-400"><div><div class="font-black text-lg">👤 ${s.name}</div><div class="text-sm opacity-70">Grade ${s.grade} • ${sData.length} trials • ${acc}% accuracy</div></div><div class="text-2xl">⭐ ${s.stars || 0}</div></div>`;
-    }).join('');
-}
-function addStudent() {
-    const name = prompt('Student name:'); if (!name) return;
-    const grade = prompt('Grade (JK-12):') || '3';
-    const goals = prompt('IEP Goals (short description):') || '';
-    const input = prompt('Primary input method (keyboard/voice/switch/eyegaze):') || 'keyboard';
-    const students = getStudents();
-    students.push({ id: 's_' + Date.now(), name, grade, goals, input, stars: 0, createdAt: new Date().toISOString() });
-    saveStudents(students); renderTeacherDashboard();
-}
-function openStudent(id) {
-    state.currentStudentId = id;
-    const s = getStudents().find(x => x.id === id); if (!s) return;
-    document.getElementById('studentName').innerText = s.name;
-    document.getElementById('studentGoals').innerText = s.goals || '—';
-    document.getElementById('studentGrade').innerText = s.grade;
-    document.getElementById('studentInputMethod').innerText = s.input;
-    document.getElementById('studentStars').innerText = s.stars || 0;
-    const data = JSON.parse(localStorage.getItem('progressData') || '[]').filter(d => d.studentId === id);
-    const prog = document.getElementById('studentProgress');
-    prog.innerHTML = data.length ? data.slice(-30).reverse().map(d => `<div class="flex justify-between items-center p-2 card border rounded-xl text-sm"><span>${new Date(d.date).toLocaleString()}</span><span class="font-bold">${d.mode}</span><span>${d.item}</span><span>${d.correct ? '✅' : '❌'}</span></div>`).join('') : '<div class="opacity-70">No data yet.</div>';
-    const insights = document.getElementById('studentInsights');
-    if (data.length < 5) insights.innerHTML = '<div class="opacity-70">Need more data (at least 5 trials).</div>';
-    else {
-        const recent = data.slice(-20); const acc = Math.round((recent.filter(d => d.correct).length / recent.length) * 100);
-        let html = `<div class="p-3 card border-2 rounded-xl">📊 <b>Overall accuracy:</b> ${acc}%</div>`;
-        if (acc < 50) html += `<div class="p-3 card border-2 border-amber-300 rounded-xl">⚠️ <b>Recommendation:</b> Lower difficulty. Try errorless learning mode.</div>`;
-        else if (acc > 85) html += `<div class="p-3 card border-2 border-emerald-300 rounded-xl">🚀 <b>Recommendation:</b> Ready for harder material.</div>`;
-        insights.innerHTML = html;
-    }
-    showScreen('studentDetail');
-}
+function renderTeacherDashboard() { const students = getStudents(); const data = JSON.parse(localStorage.getItem('progressData') || '[]'); document.getElementById('statStudents').innerText = students.length; document.getElementById('statSessions').innerText = data.length; document.getElementById('statAccuracy').innerText = data.length ? Math.round((data.filter(d => d.correct).length / data.length) * 100) + '%' : '0%'; const list = document.getElementById('studentList'); if (!students.length) { list.innerHTML = '<div class="card rounded-3xl border-2 p-8 text-center opacity-70">No students yet. Click "Add Student".</div>'; return; } list.innerHTML = students.map(s => { const sData = data.filter(d => d.studentId === s.id); const acc = sData.length ? Math.round((sData.filter(d => d.correct).length / sData.length) * 100) : 0; return `<div onclick="openStudent('${s.id}')" class="student-row card rounded-2xl border-2 p-4 cursor-pointer flex justify-between items-center hover:border-indigo-400"><div><div class="font-black text-lg">👤 ${s.name}</div><div class="text-sm opacity-70">Grade ${s.grade} • ${sData.length} trials • ${acc}% accuracy</div></div><div class="text-2xl">⭐ ${s.stars || 0}</div></div>`; }).join(''); }
+function addStudent() { const name = prompt('Student name:'); if (!name) return; const grade = prompt('Grade (JK-12):') || '3'; const goals = prompt('IEP Goals (short description):') || ''; const input = prompt('Primary input method (keyboard/voice/switch/eyegaze):') || 'keyboard'; const students = getStudents(); students.push({ id: 's_' + Date.now(), name, grade, goals, input, stars: 0, createdAt: new Date().toISOString() }); saveStudents(students); renderTeacherDashboard(); }
+function openStudent(id) { state.currentStudentId = id; const s = getStudents().find(x => x.id === id); if (!s) return; document.getElementById('studentName').innerText = s.name; document.getElementById('studentGoals').innerText = s.goals || '—'; document.getElementById('studentGrade').innerText = s.grade; document.getElementById('studentInputMethod').innerText = s.input; document.getElementById('studentStars').innerText = s.stars || 0; const data = JSON.parse(localStorage.getItem('progressData') || '[]').filter(d => d.studentId === id); const prog = document.getElementById('studentProgress'); prog.innerHTML = data.length ? data.slice(-30).reverse().map(d => `<div class="flex justify-between items-center p-2 card border rounded-xl text-sm"><span>${new Date(d.date).toLocaleString()}</span><span class="font-bold">${d.mode}</span><span>${d.item}</span><span>${d.correct ? '✅' : '❌'}</span></div>`).join('') : '<div class="opacity-70">No data yet.</div>'; const insights = document.getElementById('studentInsights'); if (data.length < 5) insights.innerHTML = '<div class="opacity-70">Need more data (at least 5 trials).</div>'; else { const recent = data.slice(-20); const acc = Math.round((recent.filter(d => d.correct).length / recent.length) * 100); let html = `<div class="p-3 card border-2 rounded-xl">📊 <b>Overall accuracy:</b> ${acc}%</div>`; if (acc < 50) html += `<div class="p-3 card border-2 border-amber-300 rounded-xl">⚠️ <b>Recommendation:</b> Lower difficulty. Try errorless learning mode.</div>`; else if (acc > 85) html += `<div class="p-3 card border-2 border-emerald-300 rounded-xl">🚀 <b>Recommendation:</b> Ready for harder material.</div>`; insights.innerHTML = html; } showScreen('studentDetail'); }
 
-function generateReport() {
-    const s = getStudents().find(x => x.id === state.currentStudentId); if (!s) return;
-    const data = JSON.parse(localStorage.getItem('progressData') || '[]').filter(d => d.studentId === s.id);
-    const { jsPDF } = window.jspdf; const doc = new jsPDF();
-    doc.setFillColor(99, 102, 241); doc.rect(0, 0, 210, 30, 'F');
-    doc.setTextColor(255, 255, 255); doc.setFontSize(20); doc.text('Inclusive Literacy Hub', 15, 15);
-    doc.setFontSize(12); doc.text('Student Progress Report', 15, 23);
-    doc.setTextColor(0, 0, 0); let y = 45;
-    doc.setFontSize(14); doc.text('Student Information', 15, y); y += 8;
-    doc.setFontSize(11); doc.text(`Name: ${s.name}`, 15, y); y += 6;
-    doc.text(`Grade: ${s.grade}`, 15, y); y += 6;
-    doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 15, y); y += 6;
-    doc.text(`Total Stars: ${s.stars || 0}`, 15, y); y += 6;
-    if (s.goals) { doc.text(`IEP Goals: ${s.goals}`, 15, y); y += 6; }
-    y += 5;
-    doc.setFontSize(14); doc.text('Performance Summary', 15, y); y += 8;
-    doc.setFontSize(11);
-    const total = data.length; const correct = data.filter(d => d.correct).length;
-    const acc = total ? Math.round((correct / total) * 100) : 0;
-    doc.text(`Total Trials: ${total}`, 15, y); y += 6;
-    doc.text(`Correct: ${correct}`, 15, y); y += 6;
-    doc.text(`Accuracy: ${acc}%`, 15, y); y += 10;
-    doc.setFontSize(14); doc.text('Recent Trials (Last 20)', 15, y); y += 8;
-    doc.setFontSize(9); doc.setFillColor(240, 240, 240); doc.rect(15, y - 4, 180, 6, 'F');
-    doc.text('Date', 15, y); doc.text('Mode', 55, y); doc.text('Item', 90, y); doc.text('Result', 160, y); y += 6;
-    data.slice(-20).reverse().forEach(d => {
-        if (y > 270) { doc.addPage(); y = 20; }
-        doc.text(new Date(d.date).toLocaleDateString().substring(0, 10), 15, y);
-        doc.text(d.mode, 55, y); doc.text((d.item || '').substring(0, 30), 90, y);
-        doc.text(d.correct ? 'CORRECT' : 'INCORRECT', 160, y); y += 5;
-    });
-    y += 5;
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(14); doc.text('Recommendations', 15, y); y += 8;
-    doc.setFontSize(11);
-    if (total < 10) doc.text('• Collect more data (at least 20 trials) for detailed insights.', 15, y);
-    else {
-        if (acc < 50) { doc.text('• Student is struggling. Consider:', 15, y); y += 6; doc.text('  - Switching to errorless learning mode', 20, y); y += 5; doc.text('  - Reducing item difficulty', 20, y); }
-        else if (acc > 85) { doc.text('• Student is excelling. Consider:', 15, y); y += 6; doc.text('  - Increasing difficulty level', 20, y); y += 5; doc.text('  - Introducing new vocabulary', 20, y); }
-        else { doc.text('• Student is making steady progress. Continue current approach.', 15, y); }
-    }
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150); doc.text(`Generated by Inclusive Literacy Hub • Page ${i} of ${pageCount}`, 15, 290); }
-    doc.save(`${s.name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().substring(0,10)}.pdf`);
-}
+function generateReport() { const s = getStudents().find(x => x.id === state.currentStudentId); if (!s) return; const data = JSON.parse(localStorage.getItem('progressData') || '[]').filter(d => d.studentId === s.id); const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.setFillColor(99, 102, 241); doc.rect(0, 0, 210, 30, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(20); doc.text('Inclusive Literacy Hub', 15, 15); doc.setFontSize(12); doc.text('Student Progress Report', 15, 23); doc.setTextColor(0, 0, 0); let y = 45; doc.setFontSize(14); doc.text('Student Information', 15, y); y += 8; doc.setFontSize(11); doc.text(`Name: ${s.name}`, 15, y); y += 6; doc.text(`Grade: ${s.grade}`, 15, y); y += 6; doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 15, y); y += 6; doc.text(`Total Stars: ${s.stars || 0}`, 15, y); y += 6; if (s.goals) { doc.text(`IEP Goals: ${s.goals}`, 15, y); y += 6; } y += 5; doc.setFontSize(14); doc.text('Performance Summary', 15, y); y += 8; doc.setFontSize(11); const total = data.length; const correct = data.filter(d => d.correct).length; const acc = total ? Math.round((correct / total) * 100) : 0; doc.text(`Total Trials: ${total}`, 15, y); y += 6; doc.text(`Correct: ${correct}`, 15, y); y += 6; doc.text(`Accuracy: ${acc}%`, 15, y); y += 10; doc.setFontSize(14); doc.text('Recent Trials (Last 20)', 15, y); y += 8; doc.setFontSize(9); doc.setFillColor(240, 240, 240); doc.rect(15, y - 4, 180, 6, 'F'); doc.text('Date', 15, y); doc.text('Mode', 55, y); doc.text('Item', 90, y); doc.text('Result', 160, y); y += 6; data.slice(-20).reverse().forEach(d => { if (y > 270) { doc.addPage(); y = 20; } doc.text(new Date(d.date).toLocaleDateString().substring(0, 10), 15, y); doc.text(d.mode, 55, y); doc.text((d.item || '').substring(0, 30), 90, y); doc.text(d.correct ? 'CORRECT' : 'INCORRECT', 160, y); y += 5; }); y += 5; if (y > 240) { doc.addPage(); y = 20; } doc.setFontSize(14); doc.text('Recommendations', 15, y); y += 8; doc.setFontSize(11); if (total < 10) doc.text('• Collect more data (at least 20 trials) for detailed insights.', 15, y); else { if (acc < 50) { doc.text('• Student is struggling. Consider:', 15, y); y += 6; doc.text('  - Switching to errorless learning mode', 20, y); y += 5; doc.text('  - Reducing item difficulty', 20, y); } else if (acc > 85) { doc.text('• Student is excelling. Consider:', 15, y); y += 6; doc.text('  - Increasing difficulty level', 20, y); y += 5; doc.text('  - Introducing new vocabulary', 20, y); } else { doc.text('• Student is making steady progress. Continue current approach.', 15, y); } } const pageCount = doc.internal.getNumberOfPages(); for (let i = 1; i <= pageCount; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150); doc.text(`Generated by Inclusive Literacy Hub • Page ${i} of ${pageCount}`, 15, 290); } doc.save(`${s.name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().substring(0,10)}.pdf`); }
 
 // ============================================================
 // INIT
 // ============================================================
-(function init() {
-    state.theme = localStorage.getItem('theme') || 'default';
-    if (state.theme !== 'default') document.body.setAttribute('data-theme', state.theme);
-    state.speechRate = parseFloat(localStorage.getItem('speechRate') || '0.9');
-    state.itemCount = parseInt(localStorage.getItem('itemCount') || '5');
-    state.lang = localStorage.getItem('lang') || 'en';
-    state.adaptiveEnabled = localStorage.getItem('adaptive') === 'true';
-    state.dwellTime = parseInt(localStorage.getItem('dwellTime') || '1200');
-    updateTokenDisplay();
-    updateAdaptiveInsight();
-})();
+(function init() { state.theme = localStorage.getItem('theme') || 'default'; if (state.theme !== 'default') document.body.setAttribute('data-theme', state.theme); state.speechRate = parseFloat(localStorage.getItem('speechRate') || '0.9'); state.itemCount = parseInt(localStorage.getItem('itemCount') || '5'); state.lang = localStorage.getItem('lang') || 'en'; state.adaptiveEnabled = localStorage.getItem('adaptive') === 'true'; state.dwellTime = parseInt(localStorage.getItem('dwellTime') || '1200'); updateTokenDisplay(); updateAdaptiveInsight(); })();
 </script>
 </body>
 </html>
